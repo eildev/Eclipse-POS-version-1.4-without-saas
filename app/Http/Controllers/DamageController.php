@@ -46,7 +46,7 @@ class DamageController extends Controller
 
         $allVariants = Variation::whereIn('id', $request->product_id)->get();
 
-        process_stock_operations($variants, Auth::user()->branch_id, $allVariants, null, 'damage');
+
 
 
         foreach ($request->product_id as $index => $variantId) {
@@ -54,22 +54,6 @@ class DamageController extends Controller
             $remainingQty = $request->quantity[$index];
             $productId = $request->damageProductId[$index];
 
-            // Fetch stocks for the branch and variant
-            // $stocks = Stock::where('branch_id', Auth::user()->branch_id)
-            //     ->where('variation_id', $variantId)
-            //     ->orderBy('created_at')
-            //     ->get();
-
-            // foreach ($stocks as $stock) {
-
-            //     $stock->stock_quantity -= $remainingQty;
-
-            //     if ($stock->stock_quantity <= 0) {
-            //         $stock->delete(); // Delete fully consumed stock
-            //     } else {
-            //         $stock->save();
-            //     }
-            // }
 
             // Create a Damage record for the remaining quantity
             if ($remainingQty > 0) {
@@ -82,6 +66,9 @@ class DamageController extends Controller
                 $damage->date = date('Y-m-d H:i:s', strtotime($request->date));
                 $damage->note = $request->note;
                 $damage->save();
+
+
+                process_stock_operations($variants, Auth::user()->branch_id, $allVariants, $damage->id, 'damage');
             }
         }
 
@@ -183,6 +170,43 @@ class DamageController extends Controller
         ];
 
         return redirect()->route('report.damage')->with($notification);
+    }
+
+
+    public function findProductVariants(Request $request, $id)
+    {
+        if ($request->isProduct) {
+            $product = Product::findOrFail($id);
+            $variant = Variation::with('product.productUnit', 'variationSize', 'stocks', 'colorName')->findOrFail($product->id);
+        } else {
+            $variant = Variation::with('product.productUnit', 'variationSize', 'stocks', 'colorName')->findOrFail($id);
+        }
+
+        // dd($variant);
+        return response()->json([
+            'status' => 200,
+            'variant' => $variant,
+        ]);
+    }
+
+    public function findProduct($id)
+    {
+        // $status = 'active';
+        // Fetch product with its related unit
+        // update for active status
+        $product = Product::with([
+            'productUnit',
+            'stockQuantity',
+            'variations' => function ($query) {
+                $query->where('productStatus', 'active')->with(['variationSize', 'product', 'colorName', 'stocks']);
+            },
+        ])->findOrFail($id);
+
+        // If no promotion details exist, still return the product with the unit
+        return response()->json([
+            'status' => '200',
+            'data' => $product,
+        ]);
     }
 
     /**

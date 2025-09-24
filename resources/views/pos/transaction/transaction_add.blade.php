@@ -63,7 +63,7 @@
                                                 <th>Transaction Type</th>
                                                 <th>Debit</th>
                                                 <th>Credit</th>
-                                                <th>Balance</th>
+
                                                 <th class="actions">Action</th>
                                             </tr>
                                         </thead>
@@ -74,7 +74,7 @@
                                                         <td>{{ $key + 1 }}</td>
                                                         <td>
                                                             <a
-                                                                href="{{ route('investor.details', $investor->id) }}">{{ $investor->name ?? '' }}</a>
+                                                                href="#">{{ $investor->name ?? '' }}</a>
                                                         </td>
                                                         @php
                                                             $dacTimeZone = new DateTimeZone('Asia/Dhaka');
@@ -94,7 +94,7 @@
                                                         <td>{{ $investor->type ?? '-' }}</td>
                                                         <td>{{ $investor->debit ?? '-' }}</td>
                                                         <td>{{ $investor->credit ?? '-' }}</td>
-                                                        <td>{{ $investor->balance ?? '-' }}</td>
+
                                                         <td class="actions">
                                                             <a href="{{ route('investor.invoice', $investor->id) }}"
                                                                 class="btn btn-sm btn-primary " title="Print">
@@ -545,6 +545,9 @@ $(document).on('change', '.select-account-id', function() {
                     type: {
                         required: true,
                     },
+                    account_id: {
+                        required: true,
+                    },
                 },
                 messages: {
                     account_type: {
@@ -567,6 +570,9 @@ $(document).on('change', '.select-account-id', function() {
                     },
                     type: {
                         required: 'Enter Amount',
+                    },
+                    account_id: {
+                        required: 'Investor Required',
                     },
                 },
                 errorElement: 'span',
