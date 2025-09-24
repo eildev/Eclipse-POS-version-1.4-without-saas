@@ -65,7 +65,7 @@ use Illuminate\Support\Facades\Route;
 
 
 // Route::get('/', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
-Route::middleware(['auth', 'verified', 'initialize.tenancy'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::controller(DashboardController::class)->group(function () {
         Route::get('/', 'index')->name('dashboard');
         Route::get('/filter-dashboard-paid-sales', 'filterPaidSales')->name('filter.dashboard.paid.sales');
