@@ -40,7 +40,7 @@ const Invoice = () => {
                         ) : invoice_logo_type === "Logo" ? (
                             logo ? (
                                 <img
-                                    src={logo}
+                                    src={`/${logo}`}
                                     alt="logo"
                                     className="h-16 w-32 -ml-2"
                                 />
@@ -53,7 +53,7 @@ const Invoice = () => {
                             <>
                                 {logo && (
                                     <img
-                                        src={logo}
+                                        src={`/${logo}`}
                                         alt="logo"
                                         className="h-16 w-32 -ml-2"
                                     />

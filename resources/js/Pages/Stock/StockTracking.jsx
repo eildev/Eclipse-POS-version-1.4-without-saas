@@ -22,11 +22,9 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 
-const WarrantyPage = () => {
+const StockTracking = () => {
     const { props } = usePage();
-    // console.log(props);
-    const { warranties, auth, pos_settings, success, error } = props;
-    // console.log("warranties", warranties);
+    const { stockTrackings, auth, pos_settings, success, error } = props;
     const permissions = auth.permissions || [];
     const [globalFilter, setGlobalFilter] = useState("");
     const [startDate, setStartDate] = useState(null);
@@ -37,25 +35,32 @@ const WarrantyPage = () => {
         pageSize: 10,
     });
     const [filters, setFilters] = useState({
-        customer: [],
+        branch: [],
         product: [],
-        color: [],
+        variation: [],
         size: [],
-        duration: [],
-        start_date: [],
-        end_date: [],
-        status: [],
+        color: [],
+        b2b_price: [],
+        b2c_price: [],
+        cost_price: [],
+        stock_id: [],
+        batch_number: [],
+        reference_type: [],
+        quantity: [],
+        warehouse: [],
+        rack: [],
     });
 
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedSaleId, setSelectedSaleId] = useState(null);
+    const [selectedStockTrackingId, setSelectedStockTrackingId] =
+        useState(null);
     const [selectedRows, setSelectedRows] = useState([]);
     const [isActionDropdownOpen, setIsActionDropdownOpen] = useState(false);
     const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
-    const [totalWarrantiesCount, setTotalWarrantiesCount] = useState(
-        warranties.length
+    const [totalStockTrackingsCount, setTotalStockTrackingsCount] = useState(
+        stockTrackings.length
     );
 
     const dropdownRef = useRef(null);
@@ -94,19 +99,24 @@ const WarrantyPage = () => {
     }, []);
 
     const {
-        warrantyManageTableFields,
+        stockTrackingManageTableFields,
         handleFieldChange,
-        showInvoice,
-        showCustomer,
+        showBranch,
         showProduct,
-        showColor,
+        showVariation,
         showSize,
-        showDuration,
-        showStartDate,
-        showEndDate,
-        showStatus,
+        showColor,
+        showB2BPrice,
+        showB2CPrice,
+        showCostPrice,
+        showStockId,
+        showBatchNumber,
+        showReferenceType,
+        showQuantity,
+        showWarehouse,
+        showRack,
         showAction,
-    } = useTableFieldHideShow();
+    } = useTableFieldHideShow(); // Adjust hook for stock tracking fields if needed
 
     const handlePrint = () => {
         const printWindow = window.open("", "_blank");
@@ -135,29 +145,45 @@ const WarrantyPage = () => {
                     switch (cell.column.id) {
                         case "sl":
                             return String(row.index + 1);
-                        case "invoice_number":
-                            return originalRow.sale?.invoice_number || "N/A";
-                        case "customer":
-                            return originalRow.sale?.customer?.name ?? "N/A";
+                        case "branch":
+                            return originalRow.branch?.name ?? "N/A";
                         case "product":
                             return originalRow.product?.name ?? "N/A";
-                        case "color":
+                        case "variation":
                             return (
-                                originalRow.variant?.color_name?.name ?? "N/A"
+                                originalRow.variation?.variation_name ?? "N/A"
                             );
                         case "size":
                             return (
-                                originalRow.variant?.variation_size?.size ??
+                                originalRow.variation?.variation_size?.size ??
                                 "N/A"
                             );
-                        case "duration":
-                            return String(originalRow.duration || "N/A");
-                        case "start_date":
-                            return originalRow.start_date || "N/A";
-                        case "end_date":
-                            return originalRow.end_date || "N/A";
-                        case "status":
-                            return String(originalRow.status || "N/A");
+                        case "color":
+                            return (
+                                originalRow.variation?.color_name?.name ?? "N/A"
+                            );
+                        case "b2b_price":
+                            return originalRow.variation?.b2b_price ?? "N/A";
+                        case "b2c_price":
+                            return originalRow.variation?.b2c_price ?? "N/A";
+                        case "cost_price":
+                            return originalRow.variation?.cost_price ?? "N/A";
+                        case "stock_id":
+                            return originalRow.stock_id ?? "N/A";
+                        case "batch_number":
+                            return originalRow.batch_number ?? "N/A";
+                        case "reference_type":
+                            return originalRow.reference_type ?? "N/A";
+                        case "reference":
+                            return (
+                                originalRow.reference?.invoice_number ?? "N/A"
+                            ); // Adjust based on reference model
+                        case "quantity":
+                            return originalRow.quantity ?? "N/A";
+                        case "warehouse":
+                            return originalRow.warehouse?.name ?? "N/A";
+                        case "rack":
+                            return originalRow.racks?.name ?? "N/A";
                         default:
                             return "";
                     }
@@ -171,18 +197,41 @@ const WarrantyPage = () => {
         if (globalFilter) filterText += `Search: ${globalFilter}, `;
         if (startDate && endDate)
             filterText += `Date: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}, `;
-        if (filters.customer.length)
-            filterText += `Customer: ${filters.customer.join(", ")}, `;
+        if (filters.branch.length)
+            filterText += `Branch: ${filters.branch.join(", ")}, `;
         if (filters.product.length)
             filterText += `Product: ${filters.product.join(", ")}, `;
-        if (filters.color.length)
-            filterText += `Color: ${filters.color.join(", ")}, `;
-        if (filters.size.length)
+        if (filters.variation.length)
+            filterText += `Variation: ${filters.variation.join(", ")}, `;
+        if (filters.size?.length)
             filterText += `Size: ${filters.size.join(", ")}, `;
-        if (filters.duration.length)
-            filterText += `Duration: ${filters.duration.join(", ")}, `;
-        if (filters.status.length)
-            filterText += `Status: ${filters.status.join(", ")}, `;
+        if (filters.color?.length)
+            filterText += `Color: ${filters.color.join(", ")}, `;
+        if (filters.b2b_price?.start) {
+            filterText += `B2B Price: ${filters.b2b_price.start} - ${
+                filters.b2b_price.end || "∞"
+            }, `;
+        }
+        if (filters.b2c_price?.start) {
+            filterText += `B2C Price: ${filters.b2c_price.start} - ${
+                filters.b2c_price.end || "∞"
+            }, `;
+        }
+        if (filters.cost_price?.start) {
+            filterText += `Cost Price: ${filters.cost_price.start} - ${
+                filters.cost_price.end || "∞"
+            }, `;
+        }
+        if (filters.reference_type.length)
+            filterText += `Reference Type: ${filters.reference_type.join(
+                ", "
+            )}, `;
+        if (filters.quantity.length)
+            filterText += `Quantity: ${filters.quantity.join(", ")}, `;
+        if (filters.warehouse.length)
+            filterText += `Warehouse: ${filters.warehouse.join(", ")}, `;
+        if (filters.rack.length)
+            filterText += `Rack: ${filters.rack.join(", ")}, `;
 
         // Dynamic settings based on column count
         const columnCount = tableColumn.length;
@@ -209,7 +258,7 @@ const WarrantyPage = () => {
         const printContent = `
             <html>
                 <head>
-                    <title>Warranty Report</title>
+                    <title>Stock Tracking Report</title>
                     <style>
                         @media print {
                             @page {
@@ -265,7 +314,7 @@ const WarrantyPage = () => {
                     </style>
                 </head>
                 <body>
-                    <h1>Warranty Report</h1>
+                    <h1>Stock Tracking Report</h1>
                     ${
                         filterText
                             ? `<p class="filters">Filters: ${filterText.slice(
@@ -305,7 +354,7 @@ const WarrantyPage = () => {
         printWindow.print();
     };
 
-    // PDF Export function (SalesTable-এর মতো ইমপ্লিমেন্ট)
+    // PDF Export function
     const exportToPDF = () => {
         const doc = new jsPDF({
             orientation: "portrait",
@@ -337,29 +386,45 @@ const WarrantyPage = () => {
                     switch (cell.column.id) {
                         case "sl":
                             return String(row.index + 1);
-                        case "invoice_number":
-                            return originalRow.sale?.invoice_number || "N/A";
-                        case "customer":
-                            return originalRow.sale?.customer?.name ?? "N/A";
+                        case "branch":
+                            return originalRow.branch?.name ?? "N/A";
                         case "product":
                             return originalRow.product?.name ?? "N/A";
-                        case "color":
+                        case "variation":
                             return (
-                                originalRow.variant?.color_name?.name ?? "N/A"
+                                originalRow.variation?.variation_name ?? "N/A"
                             );
                         case "size":
                             return (
-                                originalRow.variant?.variation_size?.size ??
+                                originalRow.variation?.variation_size?.size ??
                                 "N/A"
                             );
-                        case "duration":
-                            return String(originalRow.duration || "N/A");
-                        case "start_date":
-                            return originalRow.start_date || "N/A";
-                        case "end_date":
-                            return originalRow.end_date || "N/A";
-                        case "status":
-                            return String(originalRow.status || "N/A");
+                        case "color":
+                            return (
+                                originalRow.variation?.color_name?.name ?? "N/A"
+                            );
+                        case "b2b_price":
+                            return originalRow.variation?.b2b_price ?? "N/A";
+                        case "b2c_price":
+                            return originalRow.variation?.b2c_price ?? "N/A";
+                        case "cost_price":
+                            return originalRow.variation?.cost_price ?? "N/A";
+                        case "stock_id":
+                            return originalRow.stock_id ?? "N/A";
+                        case "batch_number":
+                            return originalRow.batch_number ?? "N/A";
+                        case "reference_type":
+                            return originalRow.reference_type ?? "N/A";
+                        case "reference":
+                            return (
+                                originalRow.reference?.invoice_number ?? "N/A"
+                            ); // Adjust based on reference
+                        case "quantity":
+                            return originalRow.quantity ?? "N/A";
+                        case "warehouse":
+                            return originalRow.warehouse?.name ?? "N/A";
+                        case "rack":
+                            return originalRow.racks?.name ?? "N/A";
                         default:
                             return "";
                     }
@@ -395,25 +460,48 @@ const WarrantyPage = () => {
         // PDF Header
         doc.setFontSize(7);
         doc.setTextColor(40);
-        doc.text("Warranty Report", leftRightMargin, 15);
+        doc.text("Stock Tracking Report", leftRightMargin, 15);
 
         // filter Status
         let filterText = "";
         if (globalFilter) filterText += `Search: ${globalFilter}, `;
         if (startDate && endDate)
             filterText += `Date: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}, `;
-        if (filters.customer.length)
-            filterText += `Customer: ${filters.customer.join(", ")}, `;
+        if (filters.branch.length)
+            filterText += `Branch: ${filters.branch.join(", ")}, `;
         if (filters.product.length)
             filterText += `Product: ${filters.product.join(", ")}, `;
-        if (filters.color.length)
-            filterText += `Color: ${filters.color.join(", ")}, `;
-        if (filters.size.length)
+        if (filters.variation.length)
+            filterText += `Variation: ${filters.variation.join(", ")}, `;
+        if (filters.size?.length)
             filterText += `Size: ${filters.size.join(", ")}, `;
-        if (filters.duration.length)
-            filterText += `Duration: ${filters.duration.join(", ")}, `;
-        if (filters.status.length)
-            filterText += `Status: ${filters.status.join(", ")}, `;
+        if (filters.color?.length)
+            filterText += `Color: ${filters.color.join(", ")}, `;
+        if (filters.b2b_price?.start) {
+            filterText += `B2B Price: ${filters.b2b_price.start} - ${
+                filters.b2b_price.end || "∞"
+            }, `;
+        }
+        if (filters.b2c_price?.start) {
+            filterText += `B2C Price: ${filters.b2c_price.start} - ${
+                filters.b2c_price.end || "∞"
+            }, `;
+        }
+        if (filters.cost_price?.start) {
+            filterText += `Cost Price: ${filters.cost_price.start} - ${
+                filters.cost_price.end || "∞"
+            }, `;
+        }
+        if (filters.reference_type.length)
+            filterText += `Reference Type: ${filters.reference_type.join(
+                ", "
+            )}, `;
+        if (filters.quantity.length)
+            filterText += `Quantity: ${filters.quantity.join(", ")}, `;
+        if (filters.warehouse.length)
+            filterText += `Warehouse: ${filters.warehouse.join(", ")}, `;
+        if (filters.rack.length)
+            filterText += `Rack: ${filters.rack.join(", ")}, `;
         if (filterText) {
             doc.setFontSize(7);
             doc.setTextColor(100);
@@ -464,11 +552,11 @@ const WarrantyPage = () => {
 
         // PDF Save
         doc.save(
-            `warranty_report_${new Date().toISOString().slice(0, 10)}.pdf`
+            `stock_tracking_report_${new Date().toISOString().slice(0, 10)}.pdf`
         );
     };
 
-    // excel export (SalesTable-এর মতো ইমপ্লিমেন্ট)
+    // excel export
     const exportToExcel = () => {
         const tableColumn = [];
         const tableRows = [];
@@ -496,29 +584,45 @@ const WarrantyPage = () => {
                     switch (cell.column.id) {
                         case "sl":
                             return String(row.index + 1);
-                        case "invoice_number":
-                            return originalRow.sale?.invoice_number || "N/A";
-                        case "customer":
-                            return originalRow.sale?.customer?.name ?? "N/A";
+                        case "branch":
+                            return originalRow.branch?.name ?? "N/A";
                         case "product":
                             return originalRow.product?.name ?? "N/A";
-                        case "color":
+                        case "variation":
                             return (
-                                originalRow.variant?.color_name?.name ?? "N/A"
+                                originalRow.variation?.variation_name ?? "N/A"
                             );
                         case "size":
                             return (
-                                originalRow.variant?.variation_size?.size ??
+                                originalRow.variation?.variation_size?.size ??
                                 "N/A"
                             );
-                        case "duration":
-                            return String(originalRow.duration || "N/A");
-                        case "start_date":
-                            return originalRow.start_date || "N/A";
-                        case "end_date":
-                            return originalRow.end_date || "N/A";
-                        case "status":
-                            return String(originalRow.status || "N/A");
+                        case "color":
+                            return (
+                                originalRow.variation?.color_name?.name ?? "N/A"
+                            );
+                        case "b2b_price":
+                            return originalRow.variation?.b2b_price ?? "N/A";
+                        case "b2c_price":
+                            return originalRow.variation?.b2c_price ?? "N/A";
+                        case "cost_price":
+                            return originalRow.variation?.cost_price ?? "N/A";
+                        case "stock_id":
+                            return originalRow.stock_id ?? "N/A";
+                        case "batch_number":
+                            return originalRow.batch_number ?? "N/A";
+                        case "reference_type":
+                            return originalRow.reference_type ?? "N/A";
+                        case "reference":
+                            return (
+                                originalRow.reference?.invoice_number ?? "N/A"
+                            ); // Adjust
+                        case "quantity":
+                            return originalRow.quantity ?? "N/A";
+                        case "warehouse":
+                            return originalRow.warehouse?.name ?? "N/A";
+                        case "rack":
+                            return originalRow.racks?.name ?? "N/A";
                         default:
                             return "";
                     }
@@ -532,22 +636,45 @@ const WarrantyPage = () => {
         if (globalFilter) filterText += `Search: ${globalFilter}, `;
         if (startDate && endDate)
             filterText += `Date: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}, `;
-        if (filters.customer.length)
-            filterText += `Customer: ${filters.customer.join(", ")}, `;
+        if (filters.branch.length)
+            filterText += `Branch: ${filters.branch.join(", ")}, `;
         if (filters.product.length)
             filterText += `Product: ${filters.product.join(", ")}, `;
-        if (filters.color.length)
-            filterText += `Color: ${filters.color.join(", ")}, `;
-        if (filters.size.length)
+        if (filters.variation.length)
+            filterText += `Variation: ${filters.variation.join(", ")}, `;
+        if (filters.size?.length)
             filterText += `Size: ${filters.size.join(", ")}, `;
-        if (filters.duration.length)
-            filterText += `Duration: ${filters.duration.join(", ")}, `;
-        if (filters.status.length)
-            filterText += `Status: ${filters.status.join(", ")}, `;
+        if (filters.color?.length)
+            filterText += `Color: ${filters.color.join(", ")}, `;
+        if (filters.b2b_price?.start) {
+            filterText += `B2B Price: ${filters.b2b_price.start} - ${
+                filters.b2b_price.end || "∞"
+            }, `;
+        }
+        if (filters.b2c_price?.start) {
+            filterText += `B2C Price: ${filters.b2c_price.start} - ${
+                filters.b2c_price.end || "∞"
+            }, `;
+        }
+        if (filters.cost_price?.start) {
+            filterText += `Cost Price: ${filters.cost_price.start} - ${
+                filters.cost_price.end || "∞"
+            }, `;
+        }
+        if (filters.reference_type.length)
+            filterText += `Reference Type: ${filters.reference_type.join(
+                ", "
+            )}, `;
+        if (filters.quantity.length)
+            filterText += `Quantity: ${filters.quantity.join(", ")}, `;
+        if (filters.warehouse.length)
+            filterText += `Warehouse: ${filters.warehouse.join(", ")}, `;
+        if (filters.rack.length)
+            filterText += `Rack: ${filters.rack.join(", ")}, `;
 
         // Create Excel data
         const wsData = [
-            ["Warranty Report"], // Header
+            ["Stock Tracking Report"], // Header
             [], // Empty row for spacing
             ...(filterText ? [["Filters:", filterText.slice(0, -2)]] : []), // Filter information
             [], // Empty row for spacing
@@ -617,46 +744,77 @@ const WarrantyPage = () => {
         ws["!cols"] = colWidths;
 
         // Append worksheet to workbook
-        XLSX.utils.book_append_sheet(wb, ws, "Warranty Report");
+        XLSX.utils.book_append_sheet(wb, ws, "Stock Tracking Report");
 
         // Generate and download Excel file
         XLSX.writeFile(
             wb,
-            `warranty_report_${new Date().toISOString().slice(0, 10)}.xlsx`
+            `stock_tracking_report_${new Date()
+                .toISOString()
+                .slice(0, 10)}.xlsx`
         );
     };
 
-    // Columns useMemo update
+    // Columns useMemo
     const columns = useMemo(() => {
-        // Generate options correctly
-        const customerOptions = [
-            ...new Set(
-                warranties.map((row) => row.sale?.customer?.name ?? "N/A")
-            ),
+        // Generate options
+        const branchOptions = [
+            ...new Set(stockTrackings.map((row) => row.branch?.name ?? "N/A")),
         ];
         const productOptions = [
-            ...new Set(warranties.map((row) => row.product?.name ?? "N/A")),
+            ...new Set(stockTrackings.map((row) => row.product?.name ?? "N/A")),
         ];
-        const colorOptions = [
+        const variationOptions = [
             ...new Set(
-                warranties.map((row) => row.variant?.color_name?.name ?? "N/A")
-            ),
-        ];
-        const sizeOptions = [
-            ...new Set(
-                warranties.map(
-                    (row) => row.variant?.variation_size?.size ?? "N/A"
+                stockTrackings.map(
+                    (row) => row.variation?.variation_name ?? "N/A"
                 )
             ),
         ];
-        const durationOptions = [
-            ...new Set(warranties.map((row) => row.duration ?? "N/A")),
-        ]; // Assume duration field
-        const statusOptions = [
-            ...new Set(warranties.map((row) => row.status ?? "N/A")),
-        ]; // Assume status field
 
-        // After states, before useMemo
+        const sizeOptions = [
+            ...new Set(
+                stockTrackings.map(
+                    (row) => row.variation?.variation_size?.size ?? "N/A"
+                )
+            ),
+        ];
+        const colorOptions = [
+            ...new Set(
+                stockTrackings.map(
+                    (row) => row.variation?.color_name?.name ?? "N/A"
+                )
+            ),
+        ];
+        const b2bPriceOptions = [
+            ...new Set(
+                stockTrackings.map((row) => row.variation?.b2b_price ?? "N/A")
+            ),
+        ];
+        const b2cPriceOptions = [
+            ...new Set(
+                stockTrackings.map((row) => row.variation?.b2c_price ?? "N/A")
+            ),
+        ];
+        const costPriceOptions = [
+            ...new Set(
+                stockTrackings.map((row) => row.variation?.cost_price ?? "N/A")
+            ),
+        ];
+        const referenceTypeOptions = [
+            ...new Set(
+                stockTrackings.map((row) => row.reference_type ?? "N/A")
+            ),
+        ];
+        const warehouseOptions = [
+            ...new Set(
+                stockTrackings.map((row) => row.warehouse?.name ?? "N/A")
+            ),
+        ];
+        const rackOptions = [
+            ...new Set(stockTrackings.map((row) => row.racks?.name ?? "N/A")),
+        ];
+
         const handleClearDateFilter = () => {
             setStartDate(null);
             setEndDate(null);
@@ -682,12 +840,10 @@ const WarrantyPage = () => {
         };
 
         const handleFilterChange = (field, values) => {
-            // Move outside too
             setFilters((prev) => ({ ...prev, [field]: values }));
         };
 
         const baseColumns = [
-            // Select column (existing)
             {
                 id: "select",
                 header: () => (
@@ -702,68 +858,38 @@ const WarrantyPage = () => {
                         className="h-4 w-4"
                     />
                 ),
-                cell: ({ row, cell }) => {
-                    console.log("Cell object:", cell); // Log the cell object
-                    console.log("Row object:", row); // Existing row log
-                    return (
-                        <input
-                            type="checkbox"
-                            checked={selectedRows.includes(row.original.id)}
-                            onChange={() => handleRowSelect(row.original.id)}
-                            className="h-4 w-4"
-                        />
-                    );
-                },
+                cell: ({ row }) => (
+                    <input
+                        type="checkbox"
+                        checked={selectedRows.includes(row.original.id)}
+                        onChange={() => handleRowSelect(row.original.id)}
+                        className="h-4 w-4"
+                    />
+                ),
                 meta: { responsive: true },
             },
             {
                 id: "sl",
                 header: "SL No",
-                cell: ({ row }) => row.index + 1,
+                cell: ({ row }) => {
+                    console.log("Row Data:", row.original);
+                    return row.index + 1;
+                },
+                enableSorting: true,
                 meta: { responsive: true },
             },
-            // Conditional columns with show/hide
-            ...(showInvoice
+            ...(showBranch
                 ? [
                       {
-                          accessorKey: "invoice_number",
-                          header: "Invoice Number",
-                          cell: ({ row }) =>
-                              row?.original?.sale?.invoice_number ? (
-                                  <button
-                                      onClick={() =>
-                                          handleInvoiceClick(
-                                              row.original.sale.id
-                                          )
-                                      }
-                                      className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium text-xs transition-colors duration-200 sm:text-sm"
-                                      title="Show Invoice"
-                                  >
-                                      #{row.original.sale.invoice_number}
-                                  </button>
-                              ) : (
-                                  <span className="text-gray-500 text-sm sm:text-base">
-                                      N/A
-                                  </span>
-                              ),
-                          enableSorting: true,
-                          meta: { responsive: true },
-                      },
-                  ]
-                : []),
-            ...(showCustomer
-                ? [
-                      {
-                          accessorFn: (row) =>
-                              row.sale?.customer?.name ?? "N/A",
-                          id: "customer",
+                          accessorFn: (row) => row.branch?.name ?? "N/A",
+                          id: "branch",
                           header: () => (
                               <div className="flex items-center gap-2">
-                                  Customer
+                                  Branch
                                   <FilterDropdown
-                                      field="customer"
-                                      options={customerOptions}
-                                      selectedValues={filters.customer || []}
+                                      field="branch"
+                                      options={branchOptions}
+                                      selectedValues={filters.branch || []}
                                       onChange={handleFilterChange}
                                       filterType="checkbox"
                                   />
@@ -796,19 +922,19 @@ const WarrantyPage = () => {
                       },
                   ]
                 : []),
-            ...(showColor
+            ...(showVariation
                 ? [
                       {
                           accessorFn: (row) =>
-                              row.variant?.color_name?.name ?? "N/A",
-                          id: "color",
+                              row.variation?.variation_name ?? "N/A",
+                          id: "variation",
                           header: () => (
                               <div className="flex items-center gap-2">
-                                  Color
+                                  Variation
                                   <FilterDropdown
-                                      field="color"
-                                      options={colorOptions}
-                                      selectedValues={filters.color || []}
+                                      field="variation"
+                                      options={variationOptions}
+                                      selectedValues={filters.variation || []}
                                       onChange={handleFilterChange}
                                       filterType="checkbox"
                                   />
@@ -823,7 +949,7 @@ const WarrantyPage = () => {
                 ? [
                       {
                           accessorFn: (row) =>
-                              row.variant?.variation_size?.size ?? "N/A",
+                              row.variation?.variation_size?.size ?? "N/A",
                           id: "size",
                           header: () => (
                               <div className="flex items-center gap-2">
@@ -842,89 +968,221 @@ const WarrantyPage = () => {
                       },
                   ]
                 : []),
-            ...(showDuration
+            ...(showColor
                 ? [
                       {
-                          accessorKey: "duration", // Assume field name
+                          accessorFn: (row) =>
+                              row.variation?.color_name?.name ?? "N/A",
+                          id: "color",
                           header: () => (
                               <div className="flex items-center gap-2">
-                                  Duration
+                                  Color
                                   <FilterDropdown
-                                      field="duration"
-                                      options={durationOptions}
-                                      selectedValues={filters.duration || []}
+                                      field="color"
+                                      options={colorOptions}
+                                      selectedValues={filters.color || []}
                                       onChange={handleFilterChange}
                                       filterType="checkbox"
                                   />
                               </div>
                           ),
-                          cell: ({ row }) => row.original.duration ?? "N/A",
                           enableSorting: false,
                           meta: { responsive: true },
                       },
                   ]
                 : []),
-            ...(showStartDate
+            ...(showB2BPrice
                 ? [
                       {
-                          accessorKey: "start_date",
+                          accessorFn: (row) =>
+                              row.variation?.b2b_price ?? "N/A",
+                          id: "b2b_price",
                           header: () => (
                               <div className="flex items-center gap-2">
-                                  Start Date
+                                  B2B Price
                                   <FilterDropdown
-                                      field="start_date"
-                                      options={[]}
-                                      selectedValues={filters.start_date || {}}
+                                      field="b2b_price"
+                                      options={b2bPriceOptions}
+                                      selectedValues={filters.b2b_price || []}
                                       onChange={handleFilterChange}
-                                      filterType="date"
+                                      filterType="number"
                                   />
                               </div>
                           ),
-                          cell: ({ row }) => row.original.start_date ?? "N/A",
-                          enableSorting: false,
+                          enableSorting: true,
                           meta: { responsive: true },
                       },
                   ]
                 : []),
-            ...(showEndDate
+            ...(showB2CPrice
                 ? [
                       {
-                          accessorKey: "end_date",
+                          accessorFn: (row) =>
+                              row.variation?.b2c_price ?? "N/A",
+                          id: "b2c_price",
                           header: () => (
-                              <div className="flex items-center gap-2 relative">
-                                  End Date
+                              <div className="flex items-center gap-2">
+                                  B2C Price
                                   <FilterDropdown
-                                      field="end_date"
-                                      options={[]}
-                                      selectedValues={filters.end_date || {}}
+                                      field="b2c_price"
+                                      options={b2cPriceOptions}
+                                      selectedValues={filters.b2c_price || []}
                                       onChange={handleFilterChange}
-                                      filterType="date"
+                                      filterType="number"
                                   />
                               </div>
                           ),
-                          cell: ({ row }) => row.original.end_date ?? "N/A",
-                          enableSorting: false,
+                          enableSorting: true,
                           meta: { responsive: true },
                       },
                   ]
                 : []),
-            ...(showStatus
+            ...(showCostPrice
                 ? [
                       {
-                          accessorKey: "status", // Assume field name
+                          accessorFn: (row) =>
+                              row.variation?.cost_price ?? "N/A",
+                          id: "cost_price",
                           header: () => (
                               <div className="flex items-center gap-2">
-                                  Status
+                                  Cost Price
                                   <FilterDropdown
-                                      field="status"
-                                      options={statusOptions}
-                                      selectedValues={filters.status || []}
+                                      field="cost_price"
+                                      options={costPriceOptions}
+                                      selectedValues={filters.cost_price || []}
+                                      onChange={handleFilterChange}
+                                      filterType="number"
+                                  />
+                              </div>
+                          ),
+                          enableSorting: true,
+                          meta: { responsive: true },
+                      },
+                  ]
+                : []),
+            ...(showStockId
+                ? [
+                      {
+                          accessorKey: "stock_id",
+                          header: "Stock ID",
+                          cell: ({ row }) => row.original.stock_id ?? "N/A",
+                          enableSorting: true,
+                          meta: { responsive: true },
+                      },
+                  ]
+                : []),
+            ...(showBatchNumber
+                ? [
+                      {
+                          accessorKey: "batch_number",
+                          header: "Batch Number",
+                          cell: ({ row }) => row.original.batch_number ?? "N/A",
+                          enableSorting: true,
+                          meta: { responsive: true },
+                      },
+                  ]
+                : []),
+            ...(showReferenceType
+                ? [
+                      {
+                          accessorKey: "reference_type",
+                          header: () => (
+                              <div className="flex items-center gap-2">
+                                  Reference Type
+                                  <FilterDropdown
+                                      field="reference_type"
+                                      options={referenceTypeOptions}
+                                      selectedValues={
+                                          filters.reference_type || []
+                                      }
                                       onChange={handleFilterChange}
                                       filterType="checkbox"
                                   />
                               </div>
                           ),
-                          cell: ({ row }) => row.original.status ?? "N/A",
+                          cell: ({ row }) =>
+                              row.original.reference_type ?? "N/A",
+                          enableSorting: false,
+                          meta: { responsive: true },
+                      },
+                  ]
+                : []),
+            {
+                accessorFn: (row) => row.reference?.invoice_number ?? "N/A",
+                id: "reference",
+                header: "Reference",
+                enableSorting: false,
+                meta: { responsive: true },
+            },
+            {
+                accessorKey: "quantity",
+                header: () => (
+                    <div className="flex items-center gap-2">
+                        Quantity
+                        <FilterDropdown
+                            field="quantity"
+                            options={[]}
+                            selectedValues={filters.quantity || {}}
+                            onChange={handleFilterChange}
+                            filterType="number"
+                        />
+                    </div>
+                ),
+                cell: ({ row }) => {
+                    const qty = row.original.quantity ?? "N/A";
+                    return (
+                        <span
+                            className={
+                                qty < 0 ? "text-red-500" : "text-gray-700"
+                            }
+                        >
+                            {qty}
+                        </span>
+                    );
+                },
+                enableSorting: true,
+                meta: { responsive: true },
+            },
+
+            ...(showWarehouse
+                ? [
+                      {
+                          accessorFn: (row) => row.warehouse?.name ?? "N/A",
+                          id: "warehouse",
+                          header: () => (
+                              <div className="flex items-center gap-2">
+                                  Warehouse
+                                  <FilterDropdown
+                                      field="warehouse"
+                                      options={warehouseOptions}
+                                      selectedValues={filters.warehouse || []}
+                                      onChange={handleFilterChange}
+                                      filterType="checkbox"
+                                  />
+                              </div>
+                          ),
+                          enableSorting: false,
+                          meta: { responsive: true },
+                      },
+                  ]
+                : []),
+            ...(showRack
+                ? [
+                      {
+                          accessorFn: (row) => row.racks?.name ?? "N/A",
+                          id: "rack",
+                          header: () => (
+                              <div className="flex items-center gap-2">
+                                  Rack
+                                  <FilterDropdown
+                                      field="rack"
+                                      options={rackOptions}
+                                      selectedValues={filters.rack || []}
+                                      onChange={handleFilterChange}
+                                      filterType="checkbox"
+                                  />
+                              </div>
+                          ),
                           enableSorting: false,
                           meta: { responsive: true },
                       },
@@ -937,20 +1195,6 @@ const WarrantyPage = () => {
                           header: "Action",
                           cell: ({ row }) => (
                               <div className="flex flex-col sm:flex-row gap-2">
-                                  {/* <h2>hello </h2> */}
-                                  <button
-                                      className="text-blue-500 hover:text-blue-700 sm:text-sm text-xs"
-                                      onClick={() =>
-                                          handleWarrantyCard(row.original.id)
-                                      }
-                                      title="warranty"
-                                  >
-                                      <Icon
-                                          icon="fa7-solid:file-invoice"
-                                          className="h-5 w-5"
-                                      />
-                                  </button>
-
                                   <button
                                       className="text-red-500 hover:text-red-700 sm:text-sm text-xs"
                                       onClick={() =>
@@ -969,34 +1213,37 @@ const WarrantyPage = () => {
                       },
                   ]
                 : []),
-        ].flat(); // Flatten conditional arrays
+        ].flat();
         return baseColumns.filter(Boolean);
     }, [
-        warranties,
+        stockTrackings,
         filters,
         permissions,
         selectedRows,
-        showInvoice,
-        showCustomer,
+        showBranch,
         showProduct,
-        showColor,
+        showVariation,
         showSize,
-        showDuration,
-        showStartDate,
-        showEndDate,
-        showStatus,
+        showColor,
+        showB2BPrice,
+        showB2CPrice,
+        showCostPrice,
+        showStockId,
+        showBatchNumber,
+        showReferenceType,
+        showQuantity,
+        showWarehouse,
+        showRack,
         showAction,
     ]);
 
-    // filteredData useMemo update (Warranty-specific filters)
+    // filteredData useMemo
     const filteredData = useMemo(() => {
-        // setIsLoading(true);
-        let filtered = warranties;
+        let filtered = stockTrackings;
 
-        // Existing filters...
-        if (filters.customer?.length > 0) {
+        if (filters.branch?.length > 0) {
             filtered = filtered.filter((row) =>
-                filters.customer.includes(row.sale?.customer?.name ?? "N/A")
+                filters.branch.includes(row.branch?.name ?? "N/A")
             );
         }
         if (filters.product?.length > 0) {
@@ -1004,59 +1251,135 @@ const WarrantyPage = () => {
                 filters.product.includes(row.product?.name ?? "N/A")
             );
         }
-        if (filters.color?.length > 0) {
-            // New
+        if (filters.variation?.length > 0) {
             filtered = filtered.filter((row) =>
-                filters.color.includes(row.variant?.color_name?.name ?? "N/A")
-            );
-        }
-        if (filters.size?.length > 0) {
-            // New
-            filtered = filtered.filter((row) =>
-                filters.size.includes(
-                    row.variant?.variation_size?.size ?? "N/A"
+                filters.variation.includes(
+                    row.variation?.variation_name ?? "N/A"
                 )
             );
         }
-        if (filters.duration?.length > 0) {
-            // New
-            filtered = filtered.filter((row) =>
-                filters.duration.includes(row.duration ?? "N/A")
-            );
-        }
-        if (filters.status?.length > 0) {
-            filtered = filtered.filter((row) =>
-                filters.status.includes(row.status ?? "N/A")
-            );
-        }
 
-        // Date filter (existing, but adapt for start_date/end_date)
-        if (filters.start_date?.start) {
+        if (filters.size?.length > 0) {
+            filtered = filtered.filter((row) =>
+                filters.size.includes(
+                    row.variation?.variation_size?.size ?? "N/A"
+                )
+            );
+        }
+        if (filters.color?.length > 0) {
+            filtered = filtered.filter((row) =>
+                filters.color.includes(row.variation?.color_name?.name ?? "N/A")
+            );
+        }
+        if (filters.b2b_price?.start) {
             filtered = filtered.filter((row) => {
                 try {
-                    const warrantyStartDate = parseISO(row.start_date); // Use row.start_date
-                    const start = filters.start_date.start;
-                    const end = filters.start_date.end;
-                    const type = filters.start_date.type || "between";
+                    const price = parseFloat(row.variation?.b2b_price) || 0;
+                    const start = parseFloat(filters.b2b_price.start);
+                    const end = parseFloat(filters.b2b_price.end);
+                    const type = filters.b2b_price.type || "between";
 
                     switch (type) {
                         case "exact":
-                            return (
-                                warrantyStartDate.toDateString() ===
-                                start.toDateString()
-                            );
-                        case "before":
-                            return warrantyStartDate < start;
-                        case "after":
-                            return warrantyStartDate > start;
+                            return price === start;
+                        case "less":
+                            return price < start;
+                        case "greater":
+                            return price > start;
                         case "between":
-                            return (
-                                end &&
-                                isWithinInterval(warrantyStartDate, {
-                                    start,
-                                    end,
-                                })
-                            );
+                            return end && price >= start && price <= end;
+                        default:
+                            return true;
+                    }
+                } catch (error) {
+                    return false;
+                }
+            });
+        }
+        if (filters.b2c_price?.start) {
+            filtered = filtered.filter((row) => {
+                try {
+                    const price = parseFloat(row.variation?.b2c_price) || 0;
+                    const start = parseFloat(filters.b2c_price.start);
+                    const end = parseFloat(filters.b2c_price.end);
+                    const type = filters.b2c_price.type || "between";
+
+                    switch (type) {
+                        case "exact":
+                            return price === start;
+                        case "less":
+                            return price < start;
+                        case "greater":
+                            return price > start;
+                        case "between":
+                            return end && price >= start && price <= end;
+                        default:
+                            return true;
+                    }
+                } catch (error) {
+                    return false;
+                }
+            });
+        }
+        if (filters.cost_price?.start) {
+            filtered = filtered.filter((row) => {
+                try {
+                    const price = parseFloat(row.variation?.cost_price) || 0;
+                    const start = parseFloat(filters.cost_price.start);
+                    const end = parseFloat(filters.cost_price.end);
+                    const type = filters.cost_price.type || "between";
+
+                    switch (type) {
+                        case "exact":
+                            return price === start;
+                        case "less":
+                            return price < start;
+                        case "greater":
+                            return price > start;
+                        case "between":
+                            return end && price >= start && price <= end;
+                        default:
+                            return true;
+                    }
+                } catch (error) {
+                    return false;
+                }
+            });
+        }
+        if (filters.reference_type?.length > 0) {
+            filtered = filtered.filter((row) =>
+                filters.reference_type.includes(row.reference_type ?? "N/A")
+            );
+        }
+        if (filters.warehouse?.length > 0) {
+            filtered = filtered.filter((row) =>
+                filters.warehouse.includes(row.warehouse?.name ?? "N/A")
+            );
+        }
+        if (filters.rack?.length > 0) {
+            filtered = filtered.filter((row) =>
+                filters.rack.includes(row.racks?.name ?? "N/A")
+            );
+        }
+
+        // Number filter for quantity
+        if (filters.quantity?.start) {
+            filtered = filtered.filter((row) => {
+                try {
+                    const qty = row.quantity;
+                    const start = filters.quantity.start;
+                    const end = filters.quantity.end;
+                    const type = filters.quantity.type || "between";
+
+                    switch (type) {
+                        case "exact":
+                            return qty === start;
+                        case "less":
+                            return qty < start;
+                        case "greater":
+                            return qty > start;
+                        case "between":
+                            return end && qty >= start && qty <= end;
                         default:
                             return true;
                     }
@@ -1066,82 +1389,64 @@ const WarrantyPage = () => {
             });
         }
 
-        // Date filter (existing, but adapt for start_date/end_date)
-        if (filters.end_date?.start) {
-            filtered = filtered.filter((row) => {
-                try {
-                    const warrantyEndDate = parseISO(row.end_date);
-                    const start = filters.end_date.start;
-                    const end = filters.end_date.end;
-                    const type = filters.end_date.type || "between";
-
-                    switch (type) {
-                        case "exact":
-                            return (
-                                warrantyStartDate.toDateString() ===
-                                start.toDateString()
-                            );
-                        case "before":
-                            return warrantyStartDate < start;
-                        case "after":
-                            return warrantyStartDate > start;
-                        case "between":
-                            return (
-                                end &&
-                                isWithinInterval(warrantyStartDate, {
-                                    start,
-                                    end,
-                                })
-                            );
-                        default:
-                            return true;
-                    }
-                } catch (error) {
-                    return false;
-                }
-            });
-        }
-
-        // Global filter update (Warranty fields)
+        // Global filter
         if (globalFilter) {
             const lowercasedFilter = globalFilter.toLowerCase();
             filtered = filtered.filter((row) => {
                 return (
                     String(row.id).toLowerCase().includes(lowercasedFilter) ||
-                    String(row.sale?.invoice_number ?? "")
-                        .toLowerCase()
-                        .includes(lowercasedFilter) ||
-                    String(row.sale?.customer?.name ?? "")
+                    String(row.branch?.name ?? "")
                         .toLowerCase()
                         .includes(lowercasedFilter) ||
                     String(row.product?.name ?? "")
                         .toLowerCase()
                         .includes(lowercasedFilter) ||
-                    String(row.variant?.color_name?.name ?? "")
+                    String(row.variation?.variation_name ?? "")
                         .toLowerCase()
                         .includes(lowercasedFilter) ||
-                    String(row.variant?.variation_size?.size ?? "")
+                    String(row.variation?.variation_size?.size ?? "")
                         .toLowerCase()
                         .includes(lowercasedFilter) ||
-                    String(row.duration ?? "")
+                    String(row.variation?.color_name?.name ?? "")
                         .toLowerCase()
                         .includes(lowercasedFilter) ||
-                    String(row.start_date ?? "")
+                    String(row.variation?.b2b_price ?? "")
                         .toLowerCase()
                         .includes(lowercasedFilter) ||
-                    String(row.end_date ?? "")
+                    String(row.variation?.b2c_price ?? "")
                         .toLowerCase()
                         .includes(lowercasedFilter) ||
-                    String(row.status ?? "")
+                    String(row.variation?.cost_price ?? "")
+                        .toLowerCase()
+                        .includes(lowercasedFilter) ||
+                    String(row.stock_id ?? "")
+                        .toLowerCase()
+                        .includes(lowercasedFilter) ||
+                    String(row.batch_number ?? "")
+                        .toLowerCase()
+                        .includes(lowercasedFilter) ||
+                    String(row.reference_type ?? "")
+                        .toLowerCase()
+                        .includes(lowercasedFilter) ||
+                    String(row.reference?.invoice_number ?? "")
+                        .toLowerCase()
+                        .includes(lowercasedFilter) ||
+                    String(row.quantity ?? "")
+                        .toLowerCase()
+                        .includes(lowercasedFilter) ||
+                    String(row.warehouse?.name ?? "")
+                        .toLowerCase()
+                        .includes(lowercasedFilter) ||
+                    String(row.racks?.name ?? "")
                         .toLowerCase()
                         .includes(lowercasedFilter)
                 );
             });
         }
 
-        setTotalWarrantiesCount(filtered.length); // Update count
+        setTotalStockTrackingsCount(filtered.length);
         return filtered;
-    }, [globalFilter, warranties, filters]);
+    }, [globalFilter, stockTrackings, filters]);
 
     // react table create
     const table = useReactTable({
@@ -1161,22 +1466,17 @@ const WarrantyPage = () => {
         getFilteredRowModel: getFilteredRowModel(),
     });
 
-    // handle Invoice Function
-    const handleInvoiceClick = (id) => {
-        location.href = "/sale/invoice/" + id;
-    };
-
-    // delete functionality Implement
+    // delete functionality
     const handleDelete = async (id) => {
         try {
             setIsLoading(true);
 
             await new Promise((resolve) => {
-                router.delete(`/warranty/delete/${id}`, {
+                router.delete(`/stock-tracking/delete/${id}`, {
                     onSuccess: () => {
-                        toast.success("Warranty Deleted Successfully");
+                        toast.success("Stock Tracking Deleted Successfully");
                         setIsModalOpen(false);
-                        router.reload({ only: ["warranties"] });
+                        router.reload({ only: ["stockTrackings"] });
                         resolve();
                     },
                     onError: () => {
@@ -1186,30 +1486,25 @@ const WarrantyPage = () => {
                 });
             });
         } catch (error) {
-            // flash message error handle
+            // handle error
         } finally {
             setIsLoading(false);
         }
     };
 
-    const openDeleteModal = (warranty) => {
-        console.log("warranty", warranty);
-        setSelectedSaleId(warranty);
+    const openDeleteModal = (stockTracking) => {
+        setSelectedStockTrackingId(stockTracking.id);
         setIsModalOpen(true);
     };
 
     const handleModuleIsOngoing = () => {
-        toast.success("This Module is is Work in Progress");
-    };
-
-    const handleWarrantyCard = (id) => {
-        location.href = "/warranty/card/" + id;
+        toast.success("This Module is Work in Progress");
     };
 
     return (
         <MainLayouts>
-            <Head title="Warranty Manage Page" />
-            <h2 className="mb-4 text-xl font-bold">Warranty Manage Page</h2>
+            <Head title="Stock Tracking Page" />
+            <h2 className="mb-4 text-xl font-bold">Stock Tracking Page</h2>
 
             <div className="p-4">
                 <div className="mb-4">
@@ -1309,7 +1604,7 @@ const WarrantyPage = () => {
                                         <div className="absolute right-0 mt-2 w-60 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 transform transition-all duration-200 ease-in-out scale-95 opacity-0 animate-[dropdown_0.2s_ease-in-out_forwards]">
                                             <div className="py-2">
                                                 {permissions.includes(
-                                                    "pos-manage.delete"
+                                                    "stock-tracking.delete"
                                                 ) && (
                                                     <button
                                                         onClick={() => {
@@ -1374,14 +1669,14 @@ const WarrantyPage = () => {
                                 ))}
                             </select>
                             <ThreeDotMenu
-                                fields={warrantyManageTableFields}
+                                fields={stockTrackingManageTableFields}
                                 onFieldChange={handleFieldChange}
                             />
                         </div>
                     </div>
                     <div className="mt-2 flex items-center gap-2">
                         <span className="text-sm font-semibold text-gray-700">
-                            Total Sales: {totalWarrantiesCount}
+                            Total Stock Trackings: {totalStockTrackingsCount}
                         </span>
                         <div
                             className="relative"
@@ -1532,16 +1827,16 @@ const WarrantyPage = () => {
                     </span>
                 </div>
 
-                {/* duplicate invoice Modal  */}
+                {/* Delete Modal */}
                 <DeleteConfirmationModal
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
                     onConfirm={handleDelete}
-                    itemId={selectedSaleId}
+                    itemId={selectedStockTrackingId}
                 />
             </div>
         </MainLayouts>
     );
 };
 
-export default WarrantyPage;
+export default StockTracking;

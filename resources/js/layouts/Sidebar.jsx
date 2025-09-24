@@ -16,8 +16,6 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
             subItems: [
                 { name: "POS", route: "/pos-page" },
                 { name: "Sale Page", route: "/sale-page" },
-                // { name: "Sale Page 2", route: "/sale" },
-                // { name: "Sale Page 3", route: "/sale/pharmacy" },
             ],
         },
         {
@@ -29,6 +27,11 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
             name: "Warranty Manage",
             route: "/warranty/manage",
             icon: "mdi:shield-check",
+        },
+        {
+            name: "Stock Tracking",
+            route: "/stock/tracking",
+            icon: "mdi:warehouse",
         },
     ];
 
