@@ -30,7 +30,7 @@ class LoanController extends Controller
             return view('pos.loan.loan-management', compact('banks'));
         } catch (\Exception $e) {
             // Log the error
-            Log::error('Error loading the Loan view: '.$e->getMessage());
+            Log::error('Error loading the Loan view: ' . $e->getMessage());
 
             return response()->view('errors.custom', [], 500);
         }
@@ -83,37 +83,33 @@ class LoanController extends Controller
             $loan->save();
 
             $bank = Bank::findOrFail($request->bank_loan_account_id);
-            $bank->update_balance += $request->loan_principal;
+            $bank->current_balance += $request->loan_principal;
+            $bank->total_credit += $request->loan_principal;
             $bank->save();
 
             $accountTransaction = new AccountTransaction;
             $accountTransaction->branch_id = Auth::user()->branch_id;
-            $accountTransaction->processed_by = Auth::user()->id;
+            $accountTransaction->created_by = Auth::user()->id;
             $accountTransaction->purpose = 'loan';
             $accountTransaction->reference_id = $loan->id; // loan id
             $accountTransaction->account_id = $request->bank_loan_account_id;
             $accountTransaction->credit = $request->loan_principal;
-            $oldBalance = AccountTransaction::where('account_id', $request->bank_loan_account_id)->latest('created_at')->first();
-            if ($oldBalance) {
-                $accountTransaction->balance = $oldBalance->balance + $request->loan_principal;
-            } else {
-                $accountTransaction->balance = $request->loan_principal;
-            }
+            $accountTransaction->transaction_id = generate_unique_invoice(AccountTransaction::class, 'transaction_id', 10);
             $accountTransaction->created_at = Carbon::now();
             $accountTransaction->save();
 
-            $transaction = new Transaction;
-            $transaction->date = $request->start_date;
-            $transaction->processed_by = Auth::user()->id;
-            $transaction->payment_type = 'receive';
-            $transaction->particulars = 'loan';
-            $transaction->others_id = $loan->id; // loan id
-            $transaction->payment_method = $request->bank_loan_account_id;
-            $transaction->credit = $request->loan_principal;
-            $transaction->debit = 0;
-            $transaction->balance = -$request->loan_principal;
-            $transaction->branch_id = Auth::user()->branch_id;
-            $transaction->save();
+            // $transaction = new Transaction;
+            // $transaction->date = $request->start_date;
+            // $transaction->processed_by = Auth::user()->id;
+            // $transaction->payment_type = 'receive';
+            // $transaction->particulars = 'loan';
+            // $transaction->others_id = $loan->id; // loan id
+            // $transaction->payment_method = $request->bank_loan_account_id;
+            // $transaction->credit = $request->loan_principal;
+            // $transaction->debit = 0;
+            // $transaction->balance = -$request->loan_principal;
+            // $transaction->branch_id = Auth::user()->branch_id;
+            // $transaction->save();
 
             return response()->json([
                 'status' => 200,
@@ -164,7 +160,7 @@ class LoanController extends Controller
             return view('pos.loan.loan-profile', compact('loan', 'branch', 'banks', 'loan_repayments'));
         } catch (\Exception $e) {
             // / Log the error
-            Log::error('Error loading the Loan view: '.$e->getMessage());
+            Log::error('Error loading the Loan view: ' . $e->getMessage());
 
             // Optionally return a custom error view or a simple error message
             return response()->view('errors.custom', [], 500);
@@ -258,7 +254,6 @@ class LoanController extends Controller
                 $transaction->balance = $request->payment_balance;
                 $transaction->branch_id = Auth::user()->branch_id;
                 $transaction->save();
-
             } else {
                 return response()->json([
                     'status' => 400,

@@ -88,7 +88,7 @@
                         <th>Date</th>
                         <th>Debit</th>
                         <th>Credit</th>
-                        <th>Balance</th>
+
 
                     </tr>
                     </tbody><tbody>
@@ -101,9 +101,7 @@
                             <td>
                                 {{ $transaction->credit }}
                             </td>
-                            <td>
-                                {{ $transaction->balance }}
-                            </td>
+
 
                         </tr>
                     </tbody>

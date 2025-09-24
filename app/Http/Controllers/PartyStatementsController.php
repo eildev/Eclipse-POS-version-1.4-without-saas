@@ -441,4 +441,7 @@ class PartyStatementsController extends Controller
             'party_statements' => $partyStatements,
         ]);
     }
+    public function PartyPayReceiveUpdate(Request $request,$id){
+        dd($request->all());
+    }
 }

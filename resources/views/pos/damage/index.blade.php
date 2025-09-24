@@ -1,21 +1,23 @@
 @extends('master')
 @section('title', '| Damage Add')
 @section('admin')
-<style>
-       /* ///drag & drop// */
-       .responsive-table {
+    <style>
+        /* ///drag & drop// */
+        .responsive-table {
             overflow: auto;
-            }
-            table {
+        }
+
+        table {
             width: 100%;
             border-spacing: 0;
             border-collapse: collapse;
-            white-space:nowrap;
-            }
-            .damage_bars{
+            white-space: nowrap;
+        }
+
+        .damage_bars {
             cursor: move;
-            }
-</style>
+        }
+    </style>
     <div class="row">
         <div class="col-md-12 grid-margin stretch-card d-flex justify-content-end">
             <div class="">
@@ -42,7 +44,7 @@
                                             },
                                         ],
                                         'stock_quantity',
-                                        )
+                                    )
                                         ->having('stock_quantity_sum', '>', 0) // Use having method here
                                         ->orderBy('stock_quantity_sum', 'asc')
                                         ->get();
@@ -82,7 +84,7 @@
                                                     <div id="" class="table-responsive">
                                                         <table class="table" id="sortable">
                                                             <thead>
-                                                                <tr  class="ui-state-default">
+                                                                <tr class="ui-state-default">
                                                                     <th>Product</th>
                                                                     <th>Color</th>
                                                                     <th>Size</th>
@@ -176,20 +178,20 @@
         // checkInvoice type
         let checkPrintType = '{{ $invoice_type }}';
         let drag_and_drop = "{{ $drag_and_drop }}";
-        if(drag_and_drop === "1"){
-        $("#sortable tbody").sortable({
-            cursor: "move",
-            placeholder: "sortable-placeholder",
-            helper: function(e, tr) {
-                var $originals = tr.children();
-                var $helper = tr.clone();
-                $helper.children().each(function(index) {
-                    $(this).width($originals.eq(index).width());
-                });
-                return $helper;
-            }
-        }).disableSelection();
-    }
+        if (drag_and_drop === "1") {
+            $("#sortable tbody").sortable({
+                cursor: "move",
+                placeholder: "sortable-placeholder",
+                helper: function(e, tr) {
+                    var $originals = tr.children();
+                    var $helper = tr.clone();
+                    $helper.children().each(function(index) {
+                        $(this).width($originals.eq(index).width());
+                    });
+                    return $helper;
+                }
+            }).disableSelection();
+        }
         // Select product
         $(document).ready(function() {
 
@@ -217,17 +219,18 @@
                 console.log('Selected Product ID:', id);
                 const product_id = id;
                 $.ajax({
-                    url: '/product/find/' + id,
+                    url: '/damage/product/find/' + id,
                     type: 'GET',
                     dataType: 'JSON',
                     success: function(res) {
+                        console.log("res Data ", res);
                         const product = res.data;
                         // console.log(product);
                         if (product.variations.length > 1) {
                             $('#varientModal').modal('show');
                             damageShowVariants(product.variations);
                         } else {
-                            fetchVariantDetails(product.variations[0].id);
+                            fetchVariantDetails(product.variations[0].id, true);
                             // console.log(product.id);
                             // alert('ok');
                         }
@@ -237,9 +240,9 @@
         });
         //-------------------------------Add Product  ------------------------------//
         // show Product function
-        function showDamageAddProduct(product, quantity,variantSumStock) {
+        function showDamageAddProduct(product, quantity, variantSumStock) {
             // console.log('stocks',variantSumStock)
-            const quantity1 = quantity ;
+            const quantity1 = quantity;
             // console.log("showAddProduct Func", product);
             // console.log('nwe',product.product.id);
             // Check if a row with the same product ID already exists
@@ -292,8 +295,8 @@
             </tr>
         `;
             $('.showDamageData').append(rowHtml);
-             // Add validation for quantity input
-            $(`.productQuantity${product.id}`).on('input', function () {
+            // Add validation for quantity input
+            $(`.productQuantity${product.id}`).on('input', function() {
                 const inputQuantity = parseInt($(this).val()) || 0;
 
                 if (inputQuantity > variantSumStock) {
@@ -367,21 +370,23 @@
         }
 
         function fetchVariantDetails(variantId, isProduct) {
+            // console.log(variantId);
             $.ajax({
-                url: `/variant/find/${variantId}`,
+                url: `/damage/variant/find/${variantId}`,
                 type: 'GET',
                 data: {
                     isProduct: isProduct
                 },
                 dataType: 'JSON',
                 success: function(res) {
+                    console.log('variant', res);
                     const variant = res.variant;
                     const product = res.variant.product.id
                     // console.log(product);
                     const variantSumStock = res.totalVariationStock;
 
                     // console.log(variantSumStock);
-                    showDamageAddProduct(variant ,'',variantSumStock);
+                    showDamageAddProduct(variant, '', variantSumStock);
 
                 },
                 error: function(error) {

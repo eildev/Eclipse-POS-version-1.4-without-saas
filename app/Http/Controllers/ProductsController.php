@@ -1432,7 +1432,7 @@ class ProductsController extends Controller
             ]);
 
             if (isset($current_stock[$key]) && $current_stock[$key] > 0) {
-                Stock::create([
+                $stocks =   Stock::create([
                     'branch_id' => Auth::user()->branch_id,
                     'product_id' => $request->productId,
                     'variation_id' => $variation->id,
@@ -1441,6 +1441,19 @@ class ProductsController extends Controller
                     'status' => 'available',
                     'manufacture_date' => ! empty($manufacture_date[$key]) ? date('Y-m-d', strtotime($manufacture_date[$key])) : null,
                     'expiry_date' => ! empty($expiry_date[$key]) ? date('Y-m-d', strtotime($expiry_date[$key])) : null,
+                ]);
+                StockTracking::create([
+                    'branch_id' => Auth::user()->branch_id,
+                    'product_id' =>  $request->productId,
+                    'variant_id' =>   $variation->id,
+                    'stock_id' =>  $stocks->id,
+                    'batch_number' => generate_batch_number(),
+                    'reference_type' => 'opening_stock',
+                    'quantity' => $current_stock[$key],
+                    'reference_id' => $stocks->id,
+                    'warehouse_id' => $stocks->warehouse_id ?? null,
+                    'rack_id' => $stocks->rack_id ?? null,
+                    'created_at' => Carbon::now(),
                 ]);
             }
         }
@@ -1506,18 +1519,18 @@ class ProductsController extends Controller
                     $stock->save();
 
                     StockTracking::create([
-                    'branch_id' => Auth::user()->branch_id,
-                    'product_id' => $variationData['productId'],
-                    'variant_id' => $variationData['variationId'],
-                    'stock_id' => $stock->id,
-                    'batch_number' => null,
-                    'reference_type' => 'bulk_update',
-                    'reference_id' => $stock->id,
-                    'quantity' => $variationData['stock'],
-                    'warehouse_id' =>  $stock->warehouse_id,
-                    'rack_id' =>  $stock->rack_id,
-                    'created_at' => Carbon::now(),
-                ]);
+                        'branch_id' => Auth::user()->branch_id,
+                        'product_id' => $variationData['productId'],
+                        'variant_id' => $variationData['variationId'],
+                        'stock_id' => $stock->id,
+                        'batch_number' => null,
+                        'reference_type' => 'bulk_update',
+                        'reference_id' => $stock->id,
+                        'quantity' => $variationData['stock'],
+                        'warehouse_id' =>  $stock->warehouse_id,
+                        'rack_id' =>  $stock->rack_id,
+                        'created_at' => Carbon::now(),
+                    ]);
                 }
             }
         }
@@ -1528,6 +1541,7 @@ class ProductsController extends Controller
     // find variants
     public function findVariant(Request $request, $id)
     {
+        // dd($request->all());
         $partyWaysRateKit = PosSetting::first();
         $customerId = $request->selectedCustomerId;
         if ($request->isProduct) {

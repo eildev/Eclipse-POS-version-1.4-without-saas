@@ -49,6 +49,7 @@ use App\Http\Controllers\VariantController;
 use App\Http\Controllers\ViaSaleController;
 use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\PartyStatementsController;
+use App\Http\Controllers\TenantController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -62,8 +63,9 @@ use Illuminate\Support\Facades\Route;
 
 */
 
+
 // Route::get('/', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'initialize.tenancy'])->group(function () {
     Route::controller(DashboardController::class)->group(function () {
         Route::get('/', 'index')->name('dashboard');
         Route::get('/filter-dashboard-paid-sales', 'filterPaidSales')->name('filter.dashboard.paid.sales');
@@ -400,6 +402,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/damage/edit/{id}', 'edit')->name('damage.edit');
         Route::post('/damage/update/{id}', 'update')->name('damage.update');
         Route::get('/damage/destroy/{damage_id}/{product_id}', 'destroy')->name('damage.destroy');
+        Route::get('/damage/variant/find/{id}', 'findProductVariants');
+        Route::get('/damage/product/find/{id}', 'findProduct');
         // Route::get('/damage/invoice/{id}', 'invoice')->name('damage.invoice');
     });
     // Promotion  related route(n)//
@@ -880,7 +884,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/party/statement/store', 'partyStatements')->name('party.statement.store');
         Route::get('/get-due-party-invoice/{partyId}', 'getPartyDueInvoice');
         Route::post('/party/due/individual/link/invoice/payment/', 'individualPartyStatementStore');
-        Route::get('//party/pay/receive/edit/{id}', 'PartyPayReceiveEdit');
+        Route::get('/party/pay/receive/edit/{id}', 'PartyPayReceiveEdit');
+        Route::post('/update/party/receive/{id}', 'PartyPayReceiveUpdate');
     });
 });
 

@@ -42,7 +42,7 @@
                                             data-bs-target="#edit">
                                             {{ $acountData->transaction_id }}
                                         </a>
-                                    @elseif($acountData->purpose == 'party_receive' || $acountData->purpose == 'party_pay')
+                                    @elseif($acountData->purpose == 'party_receive' && $acountData->partystatement->status == 'unused')
                                         <a href="#" class="party_receive_pay_edit"
                                             data-transaction-id="{{ $acountData->id }}" {{-- Assuming $acountData is defined; fix typo if it's $accountData --}}
                                             data-bs-toggle="modal" data-bs-target="#party_receive_pay_edit">
@@ -76,33 +76,65 @@
                                 <td>{{ $acountData->credit ?? '0' }}TK</td>
 
                                 <td>
-                                    @if ($acountData->purpose === 'sale' || $acountData->purpose === 'purchase')
-                                        @if ($acountData->purpose === 'sale')
-                                            @if ($acountData?->sale?->status === 'paid')
-                                                <span class="badge bg-success">Paid</span>
-                                            @elseif ($acountData?->sale?->status === 'unpaid')
-                                                <span class="badge bg-danger">Unpaid</span>
-                                            @elseif ($acountData?->sale?->status === 'partial')
-                                                <span class="badge bg-warning text-dark">Partial</span>
-                                            @else
-                                                <span
-                                                    class="badge bg-secondary">{{ $acountData?->sale?->status ?? 'N/A' }}</span>
-                                            @endif
-                                        @elseif($acountData->purpose === 'purchase')
-                                            @if ($acountData->purchase->payment_status === 'paid')
-                                                <span class="badge bg-success">Paid</span>
-                                            @elseif ($acountData->purchase->payment_status === 'unpaid')
-                                                <span class="badge bg-danger">Unpaid</span>
-                                            @elseif ($acountData->purchase->payment_status === 'partial')
-                                                <span class="badge bg-warning text-dark">Partial</span>
-                                            @else
-                                                <span
-                                                    class="badge bg-secondary">{{ $acountData->purchase->payment_status ?? 'N/A' }}</span>
-                                            @endif
+
+                                    @if (in_array($acountData->purpose, ['sale', 'purchase', 'party_receive']))
+                                        @if ($acountData->purpose === 'sale' && isset($acountData->sale))
+                                            @switch($acountData->sale->status)
+                                                @case('paid')
+                                                    <span class="badge bg-success">Paid</span>
+                                                @break
+
+                                                @case('unpaid')
+                                                    <span class="badge bg-danger">Unpaid</span>
+                                                @break
+
+                                                @case('partial')
+                                                    <span class="badge bg-warning text-dark">Partial</span>
+                                                @break
+
+                                                @default
+                                                    <span
+                                                        class="badge bg-secondary">{{ $acountData->sale->status ?? 'N/A' }}</span>
+                                            @endswitch
+                                        @elseif ($acountData->purpose === 'purchase' && isset($acountData->purchase))
+                                            @switch($acountData->purchase->payment_status)
+                                                @case('paid')
+                                                    <span class="badge bg-success">Paid</span>
+                                                @break
+
+                                                @case('unpaid')
+                                                    <span class="badge bg-danger">Unpaid</span>
+                                                @break
+
+                                                @case('partial')
+                                                    <span class="badge bg-warning text-dark">Partial</span>
+                                                @break
+
+                                                @default
+                                                    <span
+                                                        class="badge bg-secondary">{{ $acountData->purchase->payment_status ?? 'N/A' }}</span>
+                                            @endswitch
+                                        @elseif ($acountData->purpose === 'party_receive' && isset($acountData->partystatement))
+                                            @switch($acountData->partystatement->status)
+                                                @case('used')
+                                                    <span class="badge bg-success">Used</span>
+                                                @break
+
+                                                @case('unused')
+                                                    <span class="badge bg-danger">Unused</span>
+                                                @break
+
+                                                @default
+                                                    <span
+                                                        class="badge bg-secondary">{{ $acountData->partystatement->status ?? 'N/A' }}</span>
+                                            @endswitch
+                                        @else
+                                            <span class="badge bg-secondary">N/A</span>
                                         @endif
                                     @else
                                         <span class="badge bg-secondary">N/A</span>
                                     @endif
+
                                 </td>
 
                             </tr>
@@ -193,7 +225,7 @@
                 <h5 class="modal-title" id="exampleModalScrollableTitle">Edit Party Pay/Receive</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="bankToBankFormEdit" class="bankToBankFormEdit row"> {{-- Moved form open here for proper wrapping --}}
+            <form id="partyReceivePpayEdit" class="partyReceivePpayEdit row"> {{-- Moved form open here for proper wrapping --}}
                 <div class="modal-body">
 
 
@@ -217,11 +249,12 @@
                         <textarea name="description" class="form-control description_edit" id="description_edit" cols="30"
                             rows="2"></textarea>
                     </div>
-
+                    <input class="party_statement_id" value="" type="hidden">
+                    <input class="account_transaction_id" value="" type="hidden">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary update_bankToBank">Update</button>
+                    <button type="submit" class="btn btn-primary  update_party_receive_pay_edit">Update</button>
                     {{-- Changed to submit for form handling --}}
                 </div>
             </form> {{-- Closing form here --}}
@@ -341,39 +374,66 @@
             url: `/party/pay/receive/edit/${id}`,
             type: 'GET',
             success: function(data) {
-                console.log(data);
 
-                // if (data.bankTobank && data.bankTobank.from) {
-                //     $('.from_edit').val(data.bankTobank.from);
-                // } else {
-                //     console.log('From ID not found');
-                // }
-                // if (data.bankTobank && data.bankTobank.to) {
-                //     $('.to_edit').val(data.bankTobank.to);
-                // } else {
-                //     console.log('To ID not found');
-                // }
                 if (data.account_transaction.purpose == "party_receive") {
                     $('.bank_amount_edit').val(data.account_transaction.credit);
-                    // $('.party_statements').val(data.party_statements.date);
+
                 } else {
                     $('.bank_amount_edit').val(data.account_transaction.debit);
-                    // $('.bank_date_edit').val(data.party_statements.date);
                 }
+                 $('.update_party_receive_pay_edit').val(data.account_transaction.id);
+                 $('.account_transaction_id').val(data.account_transaction.id);
+                 $('.party_statement_id').val(data.party_statements.id);
 
-                // $('.date_edit').val(data.bankTobank.transfer_date);
-                // $('.date_edit').val(data.bankTobank.transfer_date);
-                // $('.description_edit').val(data.bankTobank.description);
-                // $('.update_bankToBank').val(data.bankTobank.id);
-                // if (data.bankTobank.image) {
-                //     $('.showEditImage').attr('src',
-                //         `${url}/uploads/bank_transfer/` + data.bankTobank
-                //         .image);
-                // } else {
-                //     $('.showEditImage').attr('src',
-                //         `${url}/dummy/image.jpg`);
-                // }
             }
         });
+    })
+        $('.update_party_receive_pay_edit').click(function(e) {
+        e.preventDefault();
+        // alert('ok');
+        const bank_date_edit = document.querySelector('.bank_date_edit').value;
+        const bank_amount_edit = document.querySelector('.bank_amount_edit').value;
+        const account_transaction_id = document.querySelector('.account_transaction_id').value; // Adjust selector
+        let account_transaction_id1 = $('.update_party_receive_pay_edit').val();
+        let party_statement_id = document.querySelector('.party_statement_id').value;
+        let formData = new FormData($('.partyReceivePpayEdit')[0]);
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        $.ajax({
+            url: `/update/party/receive/${account_transaction_id1}`,
+            processData: false,
+            data: formData,
+            type: 'POST',
+            contentType: false,
+            success: function(res) {
+                if (res.status == 200) {
+                    $('#party_receive_pay_edit').modal('hide');
+                    $('.partyReceivePpayEdit')[0].reset();
+                    toastr.success(res.message);
+                    window.location.reload();
+                } else if (res.status === 405) {
+                    toastr.error(res.errormessage);
+                }
+            },
+            error: function(xhr, status, error) {
+                if (xhr.status === 500) {
+                    toastr.error('Server error occurred. Please contact support.');
+                    console.log('Server Error:', xhr.responseText);
+                } else if (xhr.status === 422) {
+                    let errors = xhr.responseJSON.error;
+                    // if (errors.from) showError('.from_edit', errors.from[0]);
+                    // if (errors.to) showError('.to_edit', errors.to[0]);
+                    // if (errors.amount) showError('.amount_edit', errors.amount[0]);
+                    // if (errors.date) showError('.date_edit', errors.date[0]);
+                } else {
+                    toastr.error('An error occurred. Please try again.');
+                }
+            }
+        });
+
     })
 </script>
