@@ -5,7 +5,7 @@ namespace App\Helpers;
 use App\Models\Stock;
 use App\Models\StockTracking;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\Auth;
 
 class StockHelper
 {
@@ -24,7 +24,7 @@ class StockHelper
      * @param string $referenceType
      * @return void
      */
-    public static function deductStock($stock, &$remainingQty, &$remainingStockCount, &$stocksToUpdate, &$stockTrackingsArray, $branchId, $variantId, $allVariants, $referenceId, $referenceType = 'sale')
+    public static function deductStock($stock, &$remainingQty, &$remainingStockCount, &$stocksToUpdate, &$stockTrackingsArray, $branchId, $variantId, $allVariants, $referenceId, $referenceType = 'sale', $partyId)
     {
         if (!$stock || $remainingQty <= 0) {
             return;
@@ -43,12 +43,14 @@ class StockHelper
             'product_id' => $allVariants->firstWhere('id', $variantId)->product_id,
             'variant_id' => $variantId,
             'stock_id' => $stock->id,
-            'batch_number' => $stock->batch_number ?? '',
+            'batch_number' => $stock->batch_number ?? null,
             'reference_type' => $referenceType,
             'reference_id' => $referenceId,
             'quantity' => -$deductible,
             'warehouse_id' => $stock->warehouse_id ?? null,
             'rack_id' => $stock->rack_id ?? null,
+            'party_id' => $partyId ?? null,
+            'created_by' => Auth::user()->id ?? null,
             'created_at' => Carbon::now(),
         ];
 
@@ -77,7 +79,7 @@ class StockHelper
      * @param string $referenceType
      * @return array
      */
-    public static function processStockOperations($variants, $branchId, $allVariants, $referenceId, $referenceType = 'sale')
+    public static function processStockOperations($variants, $branchId, $allVariants, $referenceId, $referenceType = 'sale', $partyId)
     {
         $stocksToUpdate = [];
         $stockTrackingsArray = [];
@@ -100,7 +102,7 @@ class StockHelper
                     ->where('variation_id', $variantId)
                     ->first();
 
-                self::deductStock($specificStock, $remainingQty, $remainingStockCount, $stocksToUpdate, $stockTrackingsArray, $branchId, $variantId, $allVariants, $referenceId, $referenceType);
+                self::deductStock($specificStock, $remainingQty, $remainingStockCount, $stocksToUpdate, $stockTrackingsArray, $branchId, $variantId, $allVariants, $referenceId, $referenceType, $partyId);
             }
 
             // Process current stock
@@ -111,7 +113,7 @@ class StockHelper
                     ->orderBy('created_at', 'asc')
                     ->first();
 
-                self::deductStock($currentStock, $remainingQty, $remainingStockCount, $stocksToUpdate, $stockTrackingsArray, $branchId, $variantId, $allVariants, $referenceId, $referenceType);
+                self::deductStock($currentStock, $remainingQty, $remainingStockCount, $stocksToUpdate, $stockTrackingsArray, $branchId, $variantId, $allVariants, $referenceId, $referenceType, $partyId);
             }
 
             // Process remaining stocks
@@ -126,7 +128,7 @@ class StockHelper
                     break;
                 }
 
-                self::deductStock($nextStock, $remainingQty, $remainingStockCount, $stocksToUpdate, $stockTrackingsArray, $branchId, $variantId, $allVariants, $referenceId, $referenceType);
+                self::deductStock($nextStock, $remainingQty, $remainingStockCount, $stocksToUpdate, $stockTrackingsArray, $branchId, $variantId, $allVariants, $referenceId, $referenceType, $partyId);
             }
         }
 

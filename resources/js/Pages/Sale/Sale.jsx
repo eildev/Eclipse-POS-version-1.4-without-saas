@@ -18,7 +18,7 @@ import calculateArraySum from "../../utils/calculateArraySum";
 
 const Sale = () => {
     const { props } = usePage();
-    const { products, setting } = props;
+    const { products, setting, duplicateSale, duplicateSaleItems } = props;
     // console.log(promotionDetails);
     const [rows, setRows] = useState([
         {
@@ -39,6 +39,47 @@ const Sale = () => {
             stockWarehouseId: null,
         },
     ]);
+
+    useEffect(() => {
+        if (
+            duplicateSale &&
+            duplicateSaleItems &&
+            duplicateSaleItems.length > 0
+        ) {
+            // Map saleItems to rows format
+            const duplicatedRows = duplicateSaleItems.map((item, index) => ({
+                id: Date.now() + index,
+                sl: index + 1,
+                product: item.variant?.product?.name || null,
+                variantId: item.variant_id || null,
+                color: item.variant?.color_name?.name || null,
+                size: item.variant?.variation_size?.size || null,
+                price: parseInt(item.rate) || "",
+                qty: item.qty || 1,
+                maxStock:
+                    item.variant?.stocks?.reduce(
+                        (sum, stock) => sum + (stock.stock_quantity || 0),
+                        0
+                    ) || 0,
+                discountPercentage: item.discount_percentage || "",
+                discountAmount: item.discount || "",
+                warranty: item.warranty || "",
+                warranty_type: item.warranty_type || "month",
+                total: parseInt(item.sub_total) || 0,
+                stockWarehouseId: null,
+            }));
+
+            setRows(duplicatedRows);
+
+            // Select the customer from duplicateSale
+            if (duplicateSale.customer) {
+                setSelectedCustomer(duplicateSale.customer);
+            }
+
+            // Fetch new invoice number for duplicate
+            fetchInvoiceNumber();
+        }
+    }, [duplicateSale, duplicateSaleItems]);
 
     const [selectedCustomer, setSelectedCustomer] = useState(null);
     const [selectedDate, setSelectedDate] = useState(new Date());

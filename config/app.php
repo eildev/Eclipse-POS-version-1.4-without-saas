@@ -59,9 +59,9 @@ return [
 
     'asset_url' => env('ASSET_URL', '/'),
 
-    // 'url' => env('APP_URL', 'https://ledchoice.eclipseposapp.com/'),
+    // 'url' => env('APP_URL', 'https://demo.eclipseposapp.com/'),
 
-    // 'asset_url' => env('ASSET_URL', 'https://ledchoice.eclipseposapp.com/public'),
+    // 'asset_url' => env('ASSET_URL', 'https://demo.eclipseposapp.com/public'),
 
     /*
     |--------------------------------------------------------------------------

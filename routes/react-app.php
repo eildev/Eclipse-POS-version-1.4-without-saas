@@ -25,6 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/sale-table/manage', "saleTable");
         Route::post('/supplier/add', 'addSupplier');
         Route::post('/quick-purchase', 'quickPurchase');
+        Route::get('/sale/duplicate/invoice/{id}', "duplicateInvoice");
     });
 
     Route::controller(PosPageController::class)->group(function () {

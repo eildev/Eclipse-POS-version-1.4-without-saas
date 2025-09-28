@@ -49,6 +49,8 @@ const StockTracking = () => {
         quantity: [],
         warehouse: [],
         rack: [],
+        created_by: [],
+        party: [],
     });
 
     const [isLoading, setIsLoading] = useState(false);
@@ -115,6 +117,8 @@ const StockTracking = () => {
         showQuantity,
         showWarehouse,
         showRack,
+        showParty,
+        showCreatedBy,
         showAction,
     } = useTableFieldHideShow(); // Adjust hook for stock tracking fields if needed
 
@@ -168,8 +172,14 @@ const StockTracking = () => {
                             return originalRow.variation?.b2c_price ?? "N/A";
                         case "cost_price":
                             return originalRow.variation?.cost_price ?? "N/A";
+                        case "quantity":
+                            return originalRow.quantity ?? "N/A";
                         case "stock_id":
                             return originalRow.stock_id ?? "N/A";
+                        case "party":
+                            return originalRow.party?.name ?? "N/A";
+                        case "created_by":
+                            return originalRow.stock_by?.name ?? "N/A";
                         case "batch_number":
                             return originalRow.batch_number ?? "N/A";
                         case "reference_type":
@@ -178,8 +188,6 @@ const StockTracking = () => {
                             return (
                                 originalRow.reference?.invoice_number ?? "N/A"
                             ); // Adjust based on reference model
-                        case "quantity":
-                            return originalRow.quantity ?? "N/A";
                         case "warehouse":
                             return originalRow.warehouse?.name ?? "N/A";
                         case "rack":
@@ -222,6 +230,10 @@ const StockTracking = () => {
                 filters.cost_price.end || "∞"
             }, `;
         }
+        if (filters.party.length)
+            filterText += `Party: ${filters.party.join(", ")}, `;
+        if (filters.created_by.length)
+            filterText += `Created By: ${filters.created_by.join(", ")}, `;
         if (filters.reference_type.length)
             filterText += `Reference Type: ${filters.reference_type.join(
                 ", "
@@ -409,8 +421,14 @@ const StockTracking = () => {
                             return originalRow.variation?.b2c_price ?? "N/A";
                         case "cost_price":
                             return originalRow.variation?.cost_price ?? "N/A";
+                        case "quantity":
+                            return originalRow.quantity ?? "N/A";
                         case "stock_id":
                             return originalRow.stock_id ?? "N/A";
+                        case "party":
+                            return originalRow.party?.name ?? "N/A";
+                        case "created_by":
+                            return originalRow.stock_by?.name ?? "N/A";
                         case "batch_number":
                             return originalRow.batch_number ?? "N/A";
                         case "reference_type":
@@ -492,6 +510,10 @@ const StockTracking = () => {
                 filters.cost_price.end || "∞"
             }, `;
         }
+        if (filters.party.length)
+            filterText += `Party: ${filters.party.join(", ")}, `;
+        if (filters.created_by.length)
+            filterText += `Created By: ${filters.created_by.join(", ")}, `;
         if (filters.reference_type.length)
             filterText += `Reference Type: ${filters.reference_type.join(
                 ", "
@@ -607,8 +629,14 @@ const StockTracking = () => {
                             return originalRow.variation?.b2c_price ?? "N/A";
                         case "cost_price":
                             return originalRow.variation?.cost_price ?? "N/A";
+                        case "quantity":
+                            return originalRow.quantity ?? "N/A";
                         case "stock_id":
                             return originalRow.stock_id ?? "N/A";
+                        case "party":
+                            return originalRow.party?.name ?? "N/A";
+                        case "created_by":
+                            return originalRow.stock_by?.name ?? "N/A";
                         case "batch_number":
                             return originalRow.batch_number ?? "N/A";
                         case "reference_type":
@@ -661,6 +689,10 @@ const StockTracking = () => {
                 filters.cost_price.end || "∞"
             }, `;
         }
+        if (filters.party.length)
+            filterText += `Party: ${filters.party.join(", ")}, `;
+        if (filters.created_by.length)
+            filterText += `Created By: ${filters.created_by.join(", ")}, `;
         if (filters.reference_type.length)
             filterText += `Reference Type: ${filters.reference_type.join(
                 ", "
@@ -813,6 +845,15 @@ const StockTracking = () => {
         ];
         const rackOptions = [
             ...new Set(stockTrackings.map((row) => row.racks?.name ?? "N/A")),
+        ];
+
+        const partyOptions = [
+            ...new Set(stockTrackings.map((row) => row.party?.name ?? "N/A")),
+        ];
+        const createdByOptions = [
+            ...new Set(
+                stockTrackings.map((row) => row.stock_by?.name ?? "N/A")
+            ),
         ];
 
         const handleClearDateFilter = () => {
@@ -1005,11 +1046,11 @@ const StockTracking = () => {
                                       options={b2bPriceOptions}
                                       selectedValues={filters.b2b_price || []}
                                       onChange={handleFilterChange}
-                                      filterType="number"
+                                      filterType="numeric"
                                   />
                               </div>
                           ),
-                          enableSorting: true,
+                          enableSorting: false,
                           meta: { responsive: true },
                       },
                   ]
@@ -1028,11 +1069,11 @@ const StockTracking = () => {
                                       options={b2cPriceOptions}
                                       selectedValues={filters.b2c_price || []}
                                       onChange={handleFilterChange}
-                                      filterType="number"
+                                      filterType="numeric"
                                   />
                               </div>
                           ),
-                          enableSorting: true,
+                          enableSorting: false,
                           meta: { responsive: true },
                       },
                   ]
@@ -1051,15 +1092,44 @@ const StockTracking = () => {
                                       options={costPriceOptions}
                                       selectedValues={filters.cost_price || []}
                                       onChange={handleFilterChange}
-                                      filterType="number"
+                                      filterType="numeric"
                                   />
                               </div>
                           ),
-                          enableSorting: true,
+                          enableSorting: false,
                           meta: { responsive: true },
                       },
                   ]
                 : []),
+            {
+                accessorKey: "quantity",
+                header: () => (
+                    <div className="flex items-center gap-2">
+                        Quantity
+                        <FilterDropdown
+                            field="quantity"
+                            options={[]}
+                            selectedValues={filters.quantity || {}}
+                            onChange={handleFilterChange}
+                            filterType="numeric"
+                        />
+                    </div>
+                ),
+                cell: ({ row }) => {
+                    const qty = row.original.quantity ?? "N/A";
+                    return (
+                        <span
+                            className={
+                                qty < 0 ? "text-red-500" : "text-gray-700"
+                            }
+                        >
+                            {qty}
+                        </span>
+                    );
+                },
+                enableSorting: false,
+                meta: { responsive: true },
+            },
             ...(showStockId
                 ? [
                       {
@@ -1078,6 +1148,53 @@ const StockTracking = () => {
                           header: "Batch Number",
                           cell: ({ row }) => row.original.batch_number ?? "N/A",
                           enableSorting: true,
+                          meta: { responsive: true },
+                      },
+                  ]
+                : []),
+            ...(showParty
+                ? [
+                      {
+                          accessorFn: (row) => row.party?.name ?? "N/A",
+                          id: "party",
+                          header: () => (
+                              <div className="flex items-center gap-2">
+                                  Party
+                                  <FilterDropdown
+                                      field="party"
+                                      options={partyOptions}
+                                      selectedValues={filters.party || []}
+                                      onChange={handleFilterChange}
+                                      filterType="checkbox"
+                                  />
+                              </div>
+                          ),
+                          cell: ({ row }) => row.original.party?.name ?? "N/A",
+                          enableSorting: false,
+                          meta: { responsive: true },
+                      },
+                  ]
+                : []),
+            ...(showCreatedBy
+                ? [
+                      {
+                          accessorFn: (row) => row.stock_by?.name ?? "N/A",
+                          id: "created_by",
+                          header: () => (
+                              <div className="flex items-center gap-2">
+                                  Created By
+                                  <FilterDropdown
+                                      field="created_by"
+                                      options={createdByOptions}
+                                      selectedValues={filters.created_by || []}
+                                      onChange={handleFilterChange}
+                                      filterType="checkbox"
+                                  />
+                              </div>
+                          ),
+                          cell: ({ row }) =>
+                              row.original.stock_by?.name ?? "N/A",
+                          enableSorting: false,
                           meta: { responsive: true },
                       },
                   ]
@@ -1108,42 +1225,34 @@ const StockTracking = () => {
                   ]
                 : []),
             {
-                accessorFn: (row) => row.reference?.invoice_number ?? "N/A",
                 id: "reference",
                 header: "Reference",
+                accessorFn: (row) => {
+                    switch (row.reference_type) {
+                        case "sale":
+                            return row.reference?.invoice_number ?? "N/A";
+                        case "purchase":
+                            return row.reference?.invoice ?? "N/A";
+                        case "return":
+                            return (
+                                row.reference?.return_invoice_number ?? "N/A"
+                            );
+                        case "stock_adjustment":
+                            return row.reference?.adjustment_number ?? "N/A";
+                        case "quick_purchase":
+                            return row.reference?.invoice ?? "N/A";
+                        case "damage":
+                        case "stock_transfer":
+                        case "opening_stock":
+                        case "bulk_update":
+                            return "N/A";
+                        default:
+                            return "N/A";
+                    }
+                },
                 enableSorting: false,
                 meta: { responsive: true },
             },
-            {
-                accessorKey: "quantity",
-                header: () => (
-                    <div className="flex items-center gap-2">
-                        Quantity
-                        <FilterDropdown
-                            field="quantity"
-                            options={[]}
-                            selectedValues={filters.quantity || {}}
-                            onChange={handleFilterChange}
-                            filterType="number"
-                        />
-                    </div>
-                ),
-                cell: ({ row }) => {
-                    const qty = row.original.quantity ?? "N/A";
-                    return (
-                        <span
-                            className={
-                                qty < 0 ? "text-red-500" : "text-gray-700"
-                            }
-                        >
-                            {qty}
-                        </span>
-                    );
-                },
-                enableSorting: true,
-                meta: { responsive: true },
-            },
-
             ...(showWarehouse
                 ? [
                       {
@@ -1195,7 +1304,7 @@ const StockTracking = () => {
                           header: "Action",
                           cell: ({ row }) => (
                               <div className="flex flex-col sm:flex-row gap-2">
-                                  <button
+                                  {/* <button
                                       className="text-red-500 hover:text-red-700 sm:text-sm text-xs"
                                       onClick={() =>
                                           openDeleteModal(row.original)
@@ -1206,7 +1315,7 @@ const StockTracking = () => {
                                           icon="mdi:delete"
                                           className="h-5 w-5"
                                       />
-                                  </button>
+                                  </button> */}
                               </div>
                           ),
                           meta: { responsive: true },
@@ -1234,6 +1343,8 @@ const StockTracking = () => {
         showQuantity,
         showWarehouse,
         showRack,
+        showCreatedBy,
+        showParty,
         showAction,
     ]);
 
@@ -1269,6 +1380,17 @@ const StockTracking = () => {
         if (filters.color?.length > 0) {
             filtered = filtered.filter((row) =>
                 filters.color.includes(row.variation?.color_name?.name ?? "N/A")
+            );
+        }
+
+        if (filters.party?.length > 0) {
+            filtered = filtered.filter((row) =>
+                filters.party.includes(row.party?.name ?? "N/A")
+            );
+        }
+        if (filters.created_by?.length > 0) {
+            filtered = filtered.filter((row) =>
+                filters.created_by.includes(row.stock_by?.name ?? "N/A")
             );
         }
         if (filters.b2b_price?.start) {
@@ -1432,6 +1554,12 @@ const StockTracking = () => {
                         .toLowerCase()
                         .includes(lowercasedFilter) ||
                     String(row.quantity ?? "")
+                        .toLowerCase()
+                        .includes(lowercasedFilter) ||
+                    String(row.party?.name ?? "")
+                        .toLowerCase()
+                        .includes(lowercasedFilter) ||
+                    String(row.stock_by?.name ?? "")
                         .toLowerCase()
                         .includes(lowercasedFilter) ||
                     String(row.warehouse?.name ?? "")

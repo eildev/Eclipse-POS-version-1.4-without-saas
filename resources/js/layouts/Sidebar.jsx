@@ -9,14 +9,19 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
 
     const navItems = [
         { name: "Dashboard", route: "/", icon: "mdi:home-outline" },
+        // {
+        //     name: "Sale",
+        //     route: "sale-page",
+        //     icon: "mdi:account-group-outline",
+        //     subItems: [
+        //         { name: "POS", route: "/pos-page" },
+        //         { name: "Sale Page", route: "/sale-page" },
+        //     ],
+        // },
         {
             name: "Sale",
-            route: "sale-page",
-            icon: "mdi:account-group-outline",
-            subItems: [
-                { name: "POS", route: "/pos-page" },
-                { name: "Sale Page", route: "/sale-page" },
-            ],
+            route: "/sale-page",
+            icon: "mdi:cart",
         },
         {
             name: "Sale Manage",

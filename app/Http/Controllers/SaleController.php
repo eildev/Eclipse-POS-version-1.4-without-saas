@@ -252,8 +252,8 @@ class SaleController extends Controller
             $sale->quantity = $request->quantity;
             // dd($request->sale_discount_type);
             $sale->discount_type = $request->sale_discount_type;
-            $sale->total = $request->product_total;
-            $sale->change_amount = $request->invoice_total;
+            $sale->product_total = $request->product_total;
+            $sale->invoice_total = $request->invoice_total;
             $sale->discount = $request->discount;
             if ($request->sale_discount_type === 'percentage') {
                 $total = $request->product_total;
@@ -264,7 +264,7 @@ class SaleController extends Controller
             }
             $sale->total_purchase_cost = $totalCostPrice;
             $sale->tax = $request->tax;
-            $sale->receivable = $request->grand_total;
+            $sale->grand_total = $request->grand_total;
             $sale->due = $request->due;
             if ($invoice_payment === 1) {
                 if ($request->paid > 0) {
@@ -292,13 +292,8 @@ class SaleController extends Controller
                 $sale->paid = $request->paid;
             }
             // Determine the status based on paid amount
-
             $sale->order_status = 'completed';
-            $sale->final_receivable = $request->grand_total;
-            $sale->payment_method = $request->payment_method;
-            // $totalSell = $request->total_amount - $request->actual_discount;
             $sale->profit = $request->invoice_total - $totalCostPrice;
-
             $sale->note = $request->note;
             $sale->created_at = Carbon::now();
             $sale->save();
@@ -383,14 +378,10 @@ class SaleController extends Controller
                 $saleItem->variant_id = $variant->id;
                 $saleItem->rate = $item['unit_price'];
                 $saleItem->qty = $item['quantity'];
-                $saleItem->wa_status = isset($item['wa_duration']) ? 'yes' : 'no';
-                // Check if 'wa_duration' exists in the $item array
-                $saleItem->wa_duration = isset($item['wa_duration']) ? $item['wa_duration'] : null;
                 $saleItem->discount = $item['product_discount'];
                 $saleItem->sub_total = $item['total_price'];
                 $saleItem->total_purchase_cost = $variant->cost_price * $item['quantity'];
                 $saleItem->total_profit = $item['total_price'] - ($variant->cost_price * $item['quantity']);
-                $saleItem->sell_type = 'normal sell';
                 $saleItem->save();
 
                 // Loop through each stock to deduct the quantity
@@ -439,7 +430,7 @@ class SaleController extends Controller
 
             // customer table update //
             $customer = Customer::findOrFail($request->customer_id);
-            $customer->total_receivable += $request->invoice_total;
+            $customer->total_receivable += $request->grand_total;
             $customer->total_debit += $request->paid;
             calculate_Balance($customer);
 
@@ -447,34 +438,20 @@ class SaleController extends Controller
             // create new accountTransaction
             $accountTransaction = new AccountTransaction;
             $accountTransaction->branch_id = Auth::user()->branch_id;
-            $accountTransaction->purpose = 'Sale';
+            $accountTransaction->purpose = 'sale';
             $accountTransaction->reference_id = $saleId;
             $accountTransaction->account_id = $request->payment_method;
-            $accountTransaction->credit = $request->paid;
-            $oldBalance = AccountTransaction::where('account_id', $request->payment_method)->latest('created_at')->first();
-            if ($oldBalance) {
-                $accountTransaction->balance = $oldBalance->balance + $request->paid;
-            } else {
-                $accountTransaction->balance = $request->paid;
-            }
-            $accountTransaction->processed_by = Auth::user()->id;
+            $accountTransaction->credit += $request->paid;
+            $accountTransaction->transaction_id = generate_unique_invoice(AccountTransaction::class, 'transaction_id', 10);
+            $accountTransaction->created_by = Auth::user()->id;
             $accountTransaction->created_at = Carbon::now();
             $accountTransaction->save();
 
-            $transaction = new Transaction;
-            $transaction->date = $request->sale_date;
-            $transaction->processed_by = Auth::user()->id;
-            $transaction->payment_type = 'receive';
-            $transaction->particulars = 'Sale#' . $saleId;
-            $transaction->customer_id = $request->customer_id;
-            $transaction->payment_method = $request->payment_method;
-            // $transaction->credit = $request->paid;
-            // $transaction->debit = $request->invoice_total;
-            $transaction->credit = 0;
-            $transaction->debit = $request->paid;
-            $transaction->balance = $request->invoice_total - $request->paid;
-            $transaction->branch_id = Auth::user()->branch_id;
-            $transaction->save();
+            $bank = Bank::findOrFail($request->payment_method);
+            $bank->total_credit += $request->paid;
+            $bank->current_balance += $request->paid;
+            $bank->update();
+
             // ------------------------------------Party Statement-------------------------------//
             $party_statement = new PartyStatement();
             $party_statement->branch_id = Auth::user()->branch_id;

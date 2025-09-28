@@ -82,6 +82,8 @@ class ReturnController extends Controller
                         'quantity' => $sale_item['quantity'],
                         'warehouse_id' => $stock->warehouse_id ?? null,
                         'rack_id' => $stock->rack_id ?? null,
+                        'party_id' => $request->customer_id ?? null,
+                        'created_by' => Auth::user()->id ?? null,
                         'created_at' => Carbon::now(),
                     ]);
                 } else {
@@ -102,6 +104,8 @@ class ReturnController extends Controller
                         'quantity' => $sale_item['quantity'],
                         'warehouse_id' => $stock->warehouse_id ?? null,
                         'rack_id' => $stock->rack_id ?? null,
+                        'party_id' => $request->customer_id ?? null,
+                        'created_by' => Auth::user()->id ?? null,
                         'created_at' => Carbon::now(),
                     ]);
                 }

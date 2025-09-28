@@ -81,7 +81,7 @@ class StockAdjustmentController extends Controller
                         ->where('product_id', $productId)
                         ->orderBy('created_at')
                         ->get();
-                        // dd($stocks);
+                    // dd($stocks);
 
                 }
                 $prevstocks = Stock::where('branch_id', $request->branch_id)
@@ -99,32 +99,34 @@ class StockAdjustmentController extends Controller
                         $stock->stock_quantity += $remainingQty;
                         $stock->save();
                         StockTracking::create([
-                        'branch_id' => Auth::user()->branch_id,
-                        'product_id' => $productId,
-                        'variant_id' =>   $variant->id,
-                        'stock_id' => $stock->id,
-                        'batch_number' => null,
-                        'reference_type' => 'stock_adjustment',
-                        'reference_id' =>  $stock->id,
-                        'quantity' =>  $adjustQty,
-                        'warehouse_id' => null,
-                        'rack_id' =>   null,
-                        'created_at' => Carbon::now(),
-                    ]);
+                            'branch_id' => Auth::user()->branch_id,
+                            'product_id' => $productId,
+                            'variant_id' =>   $variant->id,
+                            'stock_id' => $stock->id,
+                            'batch_number' => null,
+                            'reference_type' => 'stock_adjustment',
+                            'reference_id' =>  $stock->id,
+                            'quantity' =>  $adjustQty,
+                            'warehouse_id' => null,
+                            'rack_id' =>   null,
+                            'created_by' => Auth::user()->id ?? null,
+                            'created_at' => Carbon::now(),
+                        ]);
                     } elseif ($request->adjustment_type === 'decrease') {
                         StockTracking::create([
-                        'branch_id' => Auth::user()->branch_id,
-                        'product_id' => $productId,
-                        'variant_id' =>   $variant->id,
-                        'stock_id' => $stock->id,
-                        'batch_number' => null,
-                        'reference_type' => 'stock_adjustment',
-                        'reference_id' =>  $stock->id,
-                        'quantity' =>  -$adjustQty,
-                        'warehouse_id' => null,
-                        'rack_id' =>   null,
-                        'created_at' => Carbon::now(),
-                    ]);
+                            'branch_id' => Auth::user()->branch_id,
+                            'product_id' => $productId,
+                            'variant_id' =>   $variant->id,
+                            'stock_id' => $stock->id,
+                            'batch_number' => null,
+                            'reference_type' => 'stock_adjustment',
+                            'reference_id' =>  $stock->id,
+                            'quantity' =>  -$adjustQty,
+                            'warehouse_id' => null,
+                            'rack_id' =>   null,
+                            'created_by' => Auth::user()->id ?? null,
+                            'created_at' => Carbon::now(),
+                        ]);
 
                         $newqtyDecrease = $previousQuantity - $adjustQty;
                         //  $stock->stock_quantity -= $remainingQty;
@@ -150,9 +152,7 @@ class StockAdjustmentController extends Controller
                         } else {
                             $stock->save();
                         }
-
                     }
-
                 }
 
                 $adjustmentNumber = rand(100000, 999999); // Generate a random 6-digit number
@@ -196,7 +196,6 @@ class StockAdjustmentController extends Controller
                         ]
                     );
                 }
-
             }
 
             return response()->json([

@@ -156,6 +156,7 @@ class ProductsController extends Controller
                         'reference_id' => $stock->id,
                         'warehouse_id' => $stock->warehouse_id ?? null,
                         'rack_id' => $stock->rack_id ?? null,
+                        'created_by' => Auth::user()->id ?? null,
                         'created_at' => Carbon::now(),
                     ]);
                     // Log::info("Created stock for variation ID {$productvariations->id}: ".json_encode($stock->toArray(), JSON_PRETTY_PRINT));
@@ -1453,6 +1454,7 @@ class ProductsController extends Controller
                     'reference_id' => $stocks->id,
                     'warehouse_id' => $stocks->warehouse_id ?? null,
                     'rack_id' => $stocks->rack_id ?? null,
+                    'created_by' => Auth::user()->id ?? null,
                     'created_at' => Carbon::now(),
                 ]);
             }
@@ -1529,6 +1531,7 @@ class ProductsController extends Controller
                         'quantity' => $variationData['stock'],
                         'warehouse_id' =>  $stock->warehouse_id,
                         'rack_id' =>  $stock->rack_id,
+                        'created_by' => Auth::user()->id ?? null,
                         'created_at' => Carbon::now(),
                     ]);
                 }

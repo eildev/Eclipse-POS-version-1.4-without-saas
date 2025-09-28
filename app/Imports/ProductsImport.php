@@ -16,6 +16,7 @@ use App\Models\Unit;
 use App\Models\Variation;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -66,7 +67,7 @@ class ProductsImport implements ToCollection, WithHeadingRow
         $requiredFields = ['name', 'category', 'unit', 'size', 'brand'];
         foreach ($rows as $index => $row) {
             $latestRow = $index + 1; // Adjust for zero-based indexing
-             $rowNumber =  $latestRow +1;
+            $rowNumber =  $latestRow + 1;
             Log::info("Row {$rowNumber} data: ", $row->toArray());
 
             $validationErrors = validateRow($row, $requiredFields);
@@ -158,7 +159,7 @@ class ProductsImport implements ToCollection, WithHeadingRow
                     ]
                 );
 
-                 $posSetting = PosSetting::first(); //
+                $posSetting = PosSetting::first(); //
                 $lowStockAlert = $row['low_stock_alert'] ?? ($posSetting->low_stock ?? null);
                 $variation = Variation::firstOrNew([
                     'product_id' => $product->id,
@@ -167,33 +168,33 @@ class ProductsImport implements ToCollection, WithHeadingRow
                     'variation_name' => $row['variation_name'] ?? 'N/A',
                 ]);
 
-                    if (!$variation->exists) {
-                        $existingVariations = Variation::where('product_id', $product->id)->count();
-                        $variation->status = $existingVariations === 0 ? 'default' : 'variant';
-                        $variation->barcode = $barcode;
-                    } else {
-                        // Update barcode only if provided in the Excel sheet
-                        if (!empty($row['barcode'])) {
-                            $variation->barcode = trim($row['barcode']);
-                        }
-                        }
+                if (!$variation->exists) {
+                    $existingVariations = Variation::where('product_id', $product->id)->count();
+                    $variation->status = $existingVariations === 0 ? 'default' : 'variant';
+                    $variation->barcode = $barcode;
+                } else {
+                    // Update barcode only if provided in the Excel sheet
+                    if (!empty($row['barcode'])) {
+                        $variation->barcode = trim($row['barcode']);
+                    }
+                }
 
-                        $variation->cost_price = $row['cost_price'] ?? 0;
-                        $variation->b2b_price = $row['b2b_price'] ?? 0;
-                        $variation->b2c_price = $row['b2c_price'] ?? 0;
-                        $variation->model_no = $row['model_no'] ?? 'N/A';
-                        $variation->quality = $row['quality'] ?? 'N/A';
-                        $variation->origin = $row['origin'] ?? 'N/A';
-                        $variation->low_stock_alert = $lowStockAlert;
-                        $variation->save();
+                $variation->cost_price = $row['cost_price'] ?? 0;
+                $variation->b2b_price = $row['b2b_price'] ?? 0;
+                $variation->b2c_price = $row['b2c_price'] ?? 0;
+                $variation->model_no = $row['model_no'] ?? 'N/A';
+                $variation->quality = $row['quality'] ?? 'N/A';
+                $variation->origin = $row['origin'] ?? 'N/A';
+                $variation->low_stock_alert = $lowStockAlert;
+                $variation->save();
 
-                    // dd($row['manufacture_date']);
-                    if (($row['stock'] ?? 0) > 0 ||($row['stock'] ?? 0) < 0 ) {
+                // dd($row['manufacture_date']);
+                if (($row['stock'] ?? 0) > 0 || ($row['stock'] ?? 0) < 0) {
 
-                        $existingStock = Stock::where('variation_id', $variation->id)
-                            ->first();
-                         $branchId = 1;
-                        $stock =  Stock::updateOrCreate(
+                    $existingStock = Stock::where('variation_id', $variation->id)
+                        ->first();
+                    $branchId = 1;
+                    $stock =  Stock::updateOrCreate(
                         [
                             'variation_id' => $variation->id,
                             'product_id' => $product->id,
@@ -205,25 +206,26 @@ class ProductsImport implements ToCollection, WithHeadingRow
                             'manufacture_date' => $manufactureDate ?? null,
                             'expiry_date' => $expiryDate ?? null,
                         ]
-                          );
-                       StockTracking::updateOrCreate(
-                            [
-                                'stock_id' => $stock->id,
-                                'reference_type' => 'opening_stock',
-                                'product_id' => $product->id,
-                                'variant_id' => $variation->id,
-                                'branch_id' => $row['branch_id'] ?? 1,
-                            ],
-                            [
-                                'batch_number' => generate_batch_number(),
-                                'quantity' => $row['stock'] ?? 0,
-                                'reference_id' => $stock->id,
-                                'warehouse_id' => $stock->warehouse_id ?? null,
-                                'rack_id' => $stock->rack_id ?? null,
-                                'created_at' => Carbon::now(),
-                            ]
-                        );
-                    }
+                    );
+                    StockTracking::updateOrCreate(
+                        [
+                            'stock_id' => $stock->id,
+                            'reference_type' => 'opening_stock',
+                            'product_id' => $product->id,
+                            'variant_id' => $variation->id,
+                            'branch_id' => $row['branch_id'] ?? 1,
+                        ],
+                        [
+                            'batch_number' => generate_batch_number(),
+                            'quantity' => $row['stock'] ?? 0,
+                            'reference_id' => $stock->id,
+                            'warehouse_id' => $stock->warehouse_id ?? null,
+                            'rack_id' => $stock->rack_id ?? null,
+                            'created_by' => Auth::user()->id ?? null,
+                            'created_at' => Carbon::now(),
+                        ]
+                    );
+                }
                 // } else {
                 //     // Skip if barcode already exists
                 //     continue;

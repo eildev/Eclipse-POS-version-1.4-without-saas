@@ -21,8 +21,10 @@ class StockTrackingController extends Controller
                 'variation.variationSize',
                 'variation.colorName',
                 'stock',
+                'party',
+                'stock_by',
                 'reference'
-            ])->get();
+            ])->latest()->get();
 
             return Inertia::render('Stock/StockTracking', [
                 'stockTrackings' => $stockTrackings,

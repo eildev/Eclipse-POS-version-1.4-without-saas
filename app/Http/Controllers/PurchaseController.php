@@ -49,12 +49,12 @@ class PurchaseController extends Controller
         if ($category) {
             $products = Product::withSum('stockQuantity', 'stock_quantity')
                 ->where('category_id', '!=', $category->id)
-                ->whereHas('variation') 
+                ->whereHas('variation')
                 ->orderBy('stock_quantity_sum_stock_quantity', 'asc')
                 ->get();
         } else {
             $products = Product::withSum('stockQuantity', 'stock_quantity')
-                ->whereHas('variation') 
+                ->whereHas('variation')
                 ->orderBy('stock_quantity_sum_stock_quantity', 'asc')
                 ->get();
         }
@@ -184,6 +184,8 @@ class PurchaseController extends Controller
                     'quantity' => $request->quantity[$index],
                     'warehouse_id' => $negativeStock->warehouse_id ?? null,
                     'rack_id' => $negativeStock->rack_id ?? null,
+                    'party_id' => $request->supplier_id ?? null,
+                    'created_by' => Auth::user()->id ?? null,
                     'created_at' => Carbon::now(),
                 ]);
             } else {
@@ -211,6 +213,8 @@ class PurchaseController extends Controller
                     'quantity' => $request->quantity[$index],
                     'warehouse_id' => $stock->warehouse_id ?? null,
                     'rack_id' => $stock->rack_id ?? null,
+                    'party_id' => $request->supplier_id ?? null,
+                    'created_by' => Auth::user()->id ?? null,
                     'created_at' => Carbon::now(),
                 ]);
             }

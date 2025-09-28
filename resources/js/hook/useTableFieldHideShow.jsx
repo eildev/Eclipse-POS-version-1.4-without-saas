@@ -32,19 +32,19 @@ const useTableFieldHideShow = () => {
     const [showEndDate, setShowEndDate] = useState(1);
 
     // StockTracking-specific states
-    const [showBranch, setShowBranch] = useState(1);
+    const [showBranch, setShowBranch] = useState(0);
     const [showVariation, setShowVariation] = useState(1);
-    const [showStockId, setShowStockId] = useState(1);
+    const [showStockId, setShowStockId] = useState(0);
     const [showBatchNumber, setShowBatchNumber] = useState(1);
     const [showReferenceType, setShowReferenceType] = useState(1);
     const [showReference, setShowReference] = useState(1);
-    const [showWarehouse, setShowWarehouse] = useState(1);
-    const [showRack, setShowRack] = useState(1);
-    //     const [showSize, setShowSize] = useState(1);
-    // const [showColor, setShowColor] = useState(1);
+    const [showWarehouse, setShowWarehouse] = useState(0);
+    const [showRack, setShowRack] = useState(0);
     const [showB2BPrice, setShowB2BPrice] = useState(1);
     const [showB2CPrice, setShowB2CPrice] = useState(1);
     const [showCostPrice, setShowCostPrice] = useState(1);
+    const [showCreatedBy, setShowCreatedBy] = useState(1);
+    const [showParty, setShowParty] = useState(1);
 
     const setterFunctions = {
         showInvoice: setShowInvoice,
@@ -87,6 +87,8 @@ const useTableFieldHideShow = () => {
         showB2BPrice: setShowB2BPrice,
         showB2CPrice: setShowB2CPrice,
         showCostPrice: setShowCostPrice,
+        showCreatedBy: setShowCreatedBy,
+        showParty: setShowParty,
     };
 
     const handleFieldChange = (fieldName, value) => {
@@ -194,6 +196,18 @@ const useTableFieldHideShow = () => {
                 type: "checkbox",
                 value: showCostPrice,
             },
+            {
+                name: "showParty",
+                label: "Party",
+                type: "checkbox",
+                value: showParty,
+            },
+            {
+                name: "showCreatedBy",
+                label: "Created By",
+                type: "checkbox",
+                value: showCreatedBy,
+            },
         ],
         [
             showBranch,
@@ -211,6 +225,8 @@ const useTableFieldHideShow = () => {
             showB2BPrice,
             showB2CPrice,
             showCostPrice,
+            showParty,
+            showCreatedBy,
         ]
     );
 
@@ -526,6 +542,10 @@ const useTableFieldHideShow = () => {
         setShowB2CPrice,
         showCostPrice,
         setShowCostPrice,
+        showParty,
+        setShowParty,
+        showCreatedBy,
+        setShowCreatedBy,
 
         handleFieldChange,
         saleManageTableFields,

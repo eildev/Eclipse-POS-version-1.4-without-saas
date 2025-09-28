@@ -135,7 +135,7 @@ class StockTransferController extends Controller
                 }
             }
             if (Stock::where('variation_id', $variationId)->count() == 0) {
-             $stock_id =   Stock::create([
+                $stock_id =   Stock::create([
                     'variation_id' => $variationId,
                     'product_id' => $productId,
                     'branch_id' => $request->to_branch_id,
@@ -145,7 +145,7 @@ class StockTransferController extends Controller
                     'is_Current_stock' => 1, // The new stock becomes the current stock
                 ]);
             } else {
-                 $stock_id= Stock::create([
+                $stock_id = Stock::create([
                     'variation_id' => $variationId,
                     'product_id' => $productId,
                     'branch_id' => $request->to_branch_id,
@@ -156,7 +156,7 @@ class StockTransferController extends Controller
                 ]);
             }
             // dd($request->all());
-           $stockTransfer =  StockTransfer::create([
+            $stockTransfer =  StockTransfer::create([
                 'variation_id' => $variationId,
                 'product_id' => $productId,
                 'transfer_date' => Carbon::now(),
@@ -171,32 +171,34 @@ class StockTransferController extends Controller
                 // 'note' =>
             ]);
 
-                StockTracking::create([
-                    'branch_id' => Auth::user()->branch_id,
-                    'product_id' => $productId,
-                    'variant_id' =>  $variationId,
-                    'stock_id' =>  $stock_id->id,
-                    'batch_number' => null,
-                    'reference_type' => 'stock_transfer',
-                    'reference_id' =>  $stockTransfer->id,
-                    'quantity' => $request->from_quantity,
-                    'warehouse_id' => $request->to_warehouse_id ?? null,
-                    'rack_id' =>  $request->to_racks_id ?? null,
-                    'created_at' => Carbon::now(),
-                ]);
-                StockTracking::create([
-                    'branch_id' => Auth::user()->branch_id,
-                    'product_id' => $productId,
-                    'variant_id' =>  $variationId,
-                    'stock_id' =>  $request->stock_id,
-                    'batch_number' => null,
-                    'reference_type' => 'stock_transfer',
-                    'reference_id' =>  $stockTransfer->id,
-                    'quantity' => -$request->from_quantity,
-                    'warehouse_id' => $request->from_warehouse_id ?? null,
-                    'rack_id' =>  $request->from_racks_id ?? null,
-                    'created_at' => Carbon::now(),
-                ]);
+            StockTracking::create([
+                'branch_id' => Auth::user()->branch_id,
+                'product_id' => $productId,
+                'variant_id' =>  $variationId,
+                'stock_id' =>  $stock_id->id,
+                'batch_number' => null,
+                'reference_type' => 'stock_transfer',
+                'reference_id' =>  $stockTransfer->id,
+                'quantity' => $request->from_quantity,
+                'warehouse_id' => $request->to_warehouse_id ?? null,
+                'rack_id' =>  $request->to_racks_id ?? null,
+                'created_by' => Auth::user()->id ?? null,
+                'created_at' => Carbon::now(),
+            ]);
+            StockTracking::create([
+                'branch_id' => Auth::user()->branch_id,
+                'product_id' => $productId,
+                'variant_id' =>  $variationId,
+                'stock_id' =>  $request->stock_id,
+                'batch_number' => null,
+                'reference_type' => 'stock_transfer',
+                'reference_id' =>  $stockTransfer->id,
+                'quantity' => -$request->from_quantity,
+                'warehouse_id' => $request->from_warehouse_id ?? null,
+                'rack_id' =>  $request->from_racks_id ?? null,
+                'created_by' => Auth::user()->id ?? null,
+                'created_at' => Carbon::now(),
+            ]);
             return response()->json([
                 'status' => 200,
                 'message' => 'Stock Transfer Successfully',

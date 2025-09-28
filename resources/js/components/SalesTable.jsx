@@ -205,14 +205,22 @@ const SalesTable = () => {
                                 2
                             )}`;
                         case "receive_account":
-                            return Array.isArray(originalRow.account_receive)
-                                ? originalRow.account_receive
-                                      .map(
-                                          (account) =>
-                                              account?.bank?.name ?? "N/A"
-                                      )
-                                      .join(", ")
-                                : originalRow.account_receive?.name ?? "N/A";
+                            const accounts = originalRow.account_receive;
+                            if (
+                                Array.isArray(accounts) &&
+                                accounts.length > 0
+                            ) {
+                                return accounts
+                                    .map(
+                                        (account) =>
+                                            account?.bank?.name ?? "N/A"
+                                    )
+                                    .join(", ");
+                            } else {
+                                return (
+                                    originalRow.account_receive?.name ?? "N/A"
+                                );
+                            }
                         case "sale_by":
                             return originalRow.sale_by?.name ?? "N/A";
                         case "status":
@@ -459,14 +467,22 @@ const SalesTable = () => {
                                 2
                             )}`;
                         case "receive_account":
-                            return Array.isArray(originalRow.account_receive)
-                                ? originalRow.account_receive
-                                      .map(
-                                          (account) =>
-                                              account?.bank?.name ?? "N/A"
-                                      )
-                                      .join(", ")
-                                : originalRow.account_receive?.name ?? "N/A";
+                            const accounts = originalRow.account_receive;
+                            if (
+                                Array.isArray(accounts) &&
+                                accounts.length > 0
+                            ) {
+                                return accounts
+                                    .map(
+                                        (account) =>
+                                            account?.bank?.name ?? "N/A"
+                                    )
+                                    .join(", ");
+                            } else {
+                                return (
+                                    originalRow.account_receive?.name ?? "N/A"
+                                );
+                            }
                         case "sale_by":
                             return originalRow.sale_by?.name ?? "N/A";
                         case "status":
@@ -662,14 +678,22 @@ const SalesTable = () => {
                                 2
                             )}`;
                         case "receive_account":
-                            return Array.isArray(originalRow.account_receive)
-                                ? originalRow.account_receive
-                                      .map(
-                                          (account) =>
-                                              account?.bank?.name ?? "N/A"
-                                      )
-                                      .join(", ")
-                                : originalRow.account_receive?.name ?? "N/A";
+                            const accounts = originalRow.account_receive;
+                            if (
+                                Array.isArray(accounts) &&
+                                accounts.length > 0
+                            ) {
+                                return accounts
+                                    .map(
+                                        (account) =>
+                                            account?.bank?.name ?? "N/A"
+                                    )
+                                    .join(", ");
+                            } else {
+                                return (
+                                    originalRow.account_receive?.name ?? "N/A"
+                                );
+                            }
                         case "sale_by":
                             return originalRow.sale_by?.name ?? "N/A";
                         case "status":
@@ -882,7 +906,10 @@ const SalesTable = () => {
             {
                 accessorKey: "id",
                 header: "SL No",
-                cell: ({ row }) => row.index + 1,
+                cell: ({ row }) => {
+                    console.log("Row Data:", row.original);
+                    return row.index + 1;
+                },
                 meta: { responsive: true },
             },
             showInvoice && {
@@ -1890,7 +1917,7 @@ const SalesTable = () => {
 
     // handle Duplicate Invoice Function
     const handleDuplicateInvoiceClick = (id) => {
-        location.href = "/duplicate/sale/invoice/" + id;
+        location.href = "/sale/duplicate/invoice/" + id;
     };
 
     // handle Payment Function

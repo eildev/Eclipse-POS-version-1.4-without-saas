@@ -21,13 +21,15 @@ return new class extends Migration
             $table->foreign('variant_id')->references('id')->on('variations');
             $table->integer('stock_id')->nullable();
             $table->string('batch_number')->nullable();
-            $table->enum('reference_type', ['sale', 'purchase', 'return', 'damage', 'stock_transfer', 'stock_adjustment', 'quick_purchase', 'opening_stock','bulk_update']);
+            $table->enum('reference_type', ['sale', 'purchase', 'return', 'damage', 'stock_transfer', 'stock_adjustment', 'quick_purchase', 'opening_stock', 'bulk_update']);
             $table->integer('reference_id')->nullable();
             $table->integer("quantity");
             $table->unsignedBigInteger('warehouse_id')->unsigned()->nullable();
             $table->foreign('warehouse_id')->references('id')->on('warehouses');
             $table->unsignedBigInteger('rack_id')->unsigned()->nullable();
             $table->foreign('rack_id')->references('id')->on('warehouse_racks');
+            $table->integer('party_id')->nullable();
+            $table->integer('created_by')->nullable();
             $table->timestamps();
         });
     }
