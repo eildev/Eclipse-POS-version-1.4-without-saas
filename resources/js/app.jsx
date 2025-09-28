@@ -1,7 +1,6 @@
 import { createRoot } from "react-dom/client";
 import { createInertiaApp } from "@inertiajs/react";
 import "../css/app.css";
-import { Ziggy } from "./ziggy";
 
 createInertiaApp({
     title: (title) => `${title} - EIL POS Software`,

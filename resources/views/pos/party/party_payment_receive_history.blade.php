@@ -215,8 +215,8 @@
                                     (parseFloat(dueStatement.sale.paid) || 0);
                                 invoiceNumber = dueStatement.sale.invoice_number ??
                                     'N/A';
-                                totalAmount = dueStatement.sale.grand_total ?? '';
-                                paidAmount = dueStatement.sale.paid ?? '';
+                                totalAmount = dueStatement.sale.grand_total ?? 0;
+                                paidAmount = dueStatement.sale.paid ?? 0;
                                 saleId = dueStatement.sale.id ?? '';
                             } else if (dueStatement.service_sale) {
                                 totalDue = (parseFloat(dueStatement.service_sale

@@ -25,7 +25,7 @@ const CategorySlider = ({
                             : "text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
                     }`}
                 >
-                    {category.name}
+                    {category?.name ?? "N/A"}
                 </button>
             ))}
         </div>
