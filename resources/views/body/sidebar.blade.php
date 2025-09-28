@@ -409,6 +409,25 @@
                     </li>
                 @endif
             @endif
+            <!---Promotion--->
+            {{-- @if (Auth::user()->can('promotion.menu'))
+        <li class="nav-item">
+            <a href="{{ route('promotion.view') }}"
+                class="nav-link {{ request()->routeIs('promotion.view') ? 'nav_active' : '' }}">
+                <i class="ms-2 fa-solid fa-tag link-icon"></i>
+                <span class="link-title">Promotion</span>
+            </a>
+        </li>
+    @endif
+    @if (Auth::user()->can('promotion-details.menu'))
+        <li class="nav-item">
+            <a href="{{ route('promotion.details.view') }}"
+                class="nav-link {{ request()->routeIs('promotion.details.view') ? 'nav_active' : '' }}">
+                <i class="ms-2 fa-solid fa-tags link-icon"></i>
+                <span class="link-title">Promotion Details</span>
+            </a>
+        </li>
+    @endif --}}
         </ul>
     </div>
     </li>
@@ -462,7 +481,12 @@
                         <span class="link-title">Party Transaction</span>
                     </a>
                 </li>
-
+                <li class="nav-item">
+                    <a id="report" href="{{ route('link.payment.history') }}"
+                        class="nav-link {{ request()->routeIs('link.payment.history') ? 'nav_active' : '' }}">
+                        <i class="ms-2 link-icon" data-feather="file-text"></i>
+                        <span class="link-title"> Link Payment History </span></a>
+                </li>
             </ul>
         </div>
     </li>
@@ -474,22 +498,12 @@
     {{-- ////////////////////////////////////---- Accounting----//////////////////////////////// --}}
     @if (Auth::user()->can('bank.menu'))
         {{-- <li class="nav-item nav-category">Accounting</li> --}}
-        {{-- <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('Accounting*') ? '' : 'collapsed' }}"
-                    data-bs-toggle="collapse" href="#Accounting" role="button" aria-expanded="false"
-                    aria-controls="emails">
-                    <i class="ms-2 link-icon" data-feather="mail"></i>
-                    <span class="link-title">Accounting</span>
-                    <i class="link-arrow" data-feather="chevron-down"></i>
-                </a>
-                <div class="collapse {{ request()->routeIs('Accounting*') ? 'show' : '' }}" id="Accounting">
-                    <ul class="nav sub-menu"> --}}
-        <!---Bank--->
+
         <li class="nav-item">
             <a class="nav-link {{ request()->routeIs('bank*') ? '' : 'collapsed' }}" data-bs-toggle="collapse"
                 href="#bank-add" role="button" aria-expanded="false" aria-controls="forms">
                 <i class="ms-2 link-icon" data-feather="file-text"></i>
-                <span class="link-title">Account Management</span>
+                <span class="link-title">Accounting</span>
                 <i class="link-arrow" data-feather="chevron-down"></i>
             </a>
             <div class="collapse {{ request()->routeIs('bank*') ? 'show' : '' }}" id="bank-add">
@@ -498,21 +512,21 @@
                         <a href="{{ route('bank') }}"
                             class="nav-link {{ request()->routeIs('bank') ? 'nav_active' : '' }}">
                             <i class="ms-2 fa-solid fa-building-columns link-icon"></i>
-                            <span class="link-title">Bank</span>
+                            <span class="link-title">Account Manage</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('bank.to.bank.transfer') }}"
                             class="nav-link {{ request()->routeIs('bank.to.bank.transfer') ? 'nav_active' : '' }}">
                             <i class="ms-2 fa-solid fa-building-columns link-icon"></i>
-                            <span class="link-title">Bank to Bank Transfer</span>
+                            <span class="link-title">Balance Transfer</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('bank.adjustments') }}"
                             class="nav-link {{ request()->routeIs('bank.adjustments') ? 'nav_active' : '' }}">
                             <i class="ms-2 fa-solid fa-building-columns link-icon"></i>
-                            <span class="link-title">Bank Adjustments</span>
+                            <span class="link-title">Balance Adjustments</span>
                         </a>
                     </li>
                     @if (Auth::user()->can('loan.management'))
@@ -524,90 +538,42 @@
                             </a>
                         </li>
                     @endif
-    @endif
-    <!---Bank End--->
 
-    <!---Expense--->
-    @if (Auth::user()->can('expense.menu'))
-        <li class="nav-item">
-            <a href="{{ route('expense.view') }}"
-                class="nav-link {{ request()->routeIs('expense.view') ? 'nav_active' : '' }}">
-                <i class="ms-2 fa-solid fa-money-bill-transfer link-icon"></i>
-                <span class="link-title">Expense</span>
-            </a>
-        </li>
-    @endif
-    @if (Auth::user()->can('service.sale'))
-        <li class="nav-item">
-            <a href="{{ route('service.sale') }}"
-                class="nav-link {{ request()->routeIs('service.sale') ? 'nav_active' : '' }}">
-                <i class="ms-2 fa-solid fa-money-bill-transfer link-icon"></i>
-                <span class="link-title">Service Sale</span>
+                <!---Bank End--->
 
-            </a>
-        </li>
-    @endif
+                <!---Expense--->
+                @if (Auth::user()->can('expense.menu'))
+                    <li class="nav-item">
+                        <a href="{{ route('expense.view') }}"
+                            class="nav-link {{ request()->routeIs('expense.view') ? 'nav_active' : '' }}">
+                            <i class="ms-2 fa-solid fa-money-bill-transfer link-icon"></i>
+                            <span class="link-title">Expense</span>
+                        </a>
+                    </li>
+                @endif
+                @if (Auth::user()->can('service.sale'))
+                    <li class="nav-item">
+                        <a href="{{ route('service.sale') }}"
+                            class="nav-link {{ request()->routeIs('service.sale') ? 'nav_active' : '' }}">
+                            <i class="ms-2 fa-solid fa-money-bill-transfer link-icon"></i>
+                            <span class="link-title">Service Sale</span>
+
+                        </a>
+                    </li>
+                @endif
     <!---Expense End--->
     <!---Transaction--->
 
-    {{-- @if (Auth::user()->can('transaction.menu'))
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('transaction*') ? '' : 'collapsed' }}"
-                        data-bs-toggle="collapse" href="#transaction-add" role="button" aria-expanded="false"
-                        aria-controls="forms">
-                        <i class="ms-2 link-icon" data-feather="file-text"></i>
-                        <span class="link-title">Transaction</span>
-                        <i class="link-arrow" data-feather="chevron-down"></i>
-                    </a>
-                    <div class="collapse {{ request()->routeIs('transaction.add*') ? 'show' : '' }}"
-                        id="transaction-add">
-                        <ul class="nav sub-menu">
-                            <li class="nav-item">
-                                <a id="report" href="{{ route('transaction.add') }}"
-                                    class="nav-link {{ request()->routeIs('transaction.add') ? 'nav_active' : '' }}">
-                                    Transaction</a>
-                            </li>
-                            <li class="nav-item">
-                                <a id="report" href="{{ route('link.payment.history') }}"
-                                    class="nav-link {{ request()->routeIs('link.payment.history') ? 'nav_active' : '' }}">
-                                    Link Payment History</a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-            @endif --}}
+
     <li class="nav-item">
         <a id="report" href="{{ route('transaction.add') }}"
             class="nav-link {{ request()->routeIs('transaction.add') ? 'nav_active' : '' }}">
             <i class="ms-2 link-icon" data-feather="file-text"></i>
             <span class="link-title">Investor Transaction </span></a>
     </li>
-    <li class="nav-item">
-        <a id="report" href="{{ route('link.payment.history') }}"
-            class="nav-link {{ request()->routeIs('link.payment.history') ? 'nav_active' : '' }}">
-            <i class="ms-2 link-icon" data-feather="file-text"></i>
-            <span class="link-title"> Link Payment History </span></a>
-    </li>
+
     <!---Transaction End--->
-    <!---Promotion--->
-    @if (Auth::user()->can('promotion.menu'))
-        <li class="nav-item">
-            <a href="{{ route('promotion.view') }}"
-                class="nav-link {{ request()->routeIs('promotion.view') ? 'nav_active' : '' }}">
-                <i class="ms-2 fa-solid fa-tag link-icon"></i>
-                <span class="link-title">Promotion</span>
-            </a>
-        </li>
-    @endif
-    @if (Auth::user()->can('promotion-details.menu'))
-        <li class="nav-item">
-            <a href="{{ route('promotion.details.view') }}"
-                class="nav-link {{ request()->routeIs('promotion.details.view') ? 'nav_active' : '' }}">
-                <i class="ms-2 fa-solid fa-tags link-icon"></i>
-                <span class="link-title">Promotion Details</span>
-            </a>
-        </li>
-    @endif
+
     @if (Auth::user()->can('account.transaction.report'))
         <li class="nav-item">
             <a href="{{ route('report.account.transaction') }}"
@@ -616,7 +582,7 @@
                 <span class="link-title">Account Trans. Report </span></a>
         </li>
     @endif
-
+ @endif
     </ul>
     </div>
     </li>
