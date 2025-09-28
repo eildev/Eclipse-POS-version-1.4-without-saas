@@ -190,17 +190,17 @@ const QuickPurchaseModal = ({
         try {
             const formData = new FormData();
             formData.append("name", productData.name);
-            formData.append("unit", productData.unit_id);
+            formData.append("unit", productData.unit_id || "");
             if (productData.category_id)
                 formData.append("category_id", productData.category_id);
             if (productData.subcategory_id)
                 formData.append("subcategory_id", productData.subcategory_id);
             if (productData.brand_id)
                 formData.append("brand_id", productData.brand_id);
-            if (productData.unit_id)
-                formData.append("unit_id", productData.unit_id);
             if (productData.description)
                 formData.append("description", productData.description);
+            if (productData.variant_name)
+                formData.append("variant_name", productData.variant_name);
             formData.append("variation.cost_price", productData.cost_price);
             if (productData.sale_price) {
                 if (salePriceType === "b2c_price") {
@@ -241,15 +241,41 @@ const QuickPurchaseModal = ({
                     "Content-Type": "multipart/form-data",
                 },
             });
-            console.log(response);
+            console.log("via Product", response.data);
 
             if (response.data.status === 201) {
                 toast.success("Product Saved successfully.");
-                setIsAddProductModalOpen(false);
 
-                // Refresh quickPurchaseProducts
+                // Store the new product temporarily
+                const newProduct = response.data.variation; // Assuming response.data.product returns the new product object
+
+                // Refresh quickPurchaseProducts with onSuccess callback
                 router.reload({
                     only: ["quickPurchaseProducts"],
+                    onSuccess: () => {
+                        // Close modal and add row after reload success
+                        setIsAddProductModalOpen(false);
+                        if (newProduct) {
+                            const newRow = {
+                                id: Date.now(),
+                                product: newProduct?.product?.name || null,
+                                variantId: newProduct?.id || null,
+                                color: newProduct?.color_name?.name || "",
+                                size: newProduct?.variation_size?.size || "",
+                                costPrice: newProduct?.cost_price || 0,
+                                salePrice:
+                                    salePriceType === "b2c_price"
+                                        ? newProduct?.b2c_price
+                                        : newProduct?.b2b_price || 0,
+                                qty: 1,
+                                total: newProduct?.cost_price || 0,
+                            };
+                            setPurchaseRows((prevRows) => [
+                                ...prevRows,
+                                newRow,
+                            ]);
+                        }
+                    },
                 });
             } else {
                 throw new Error(

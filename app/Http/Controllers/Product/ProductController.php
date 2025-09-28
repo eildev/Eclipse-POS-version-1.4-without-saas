@@ -36,8 +36,8 @@ class ProductController extends Controller
                 'variation_cost_price' => 'required|numeric|min:0',
                 'variation_b2b_price' => 'nullable|numeric|min:0',
                 'variation_b2c_price' => 'nullable|numeric|min:0',
-                'variation_size' => 'required|exists:psizes,id',
-                'variation_color' => 'required|exists:colors,id',
+                'variation_size' => 'nullable|exists:psizes,id',
+                'variation_color' => 'nullable|exists:colors,id',
                 'variation_model_no' => 'nullable|string|max:100',
                 'variation_quality' => 'nullable|string|max:100',
                 'variation_origin' => 'nullable|string|max:100',
@@ -78,7 +78,7 @@ class ProductController extends Controller
                 // Create the variation
                 $variation = Variation::create([
                     'product_id' => $product->id,
-                    'variation_name' => $request->name . ' Variant', // Example naming
+                    'variation_name' => $request->variant_name ?? $request->name . ' Variant',
                     'barcode' => $barcode, // Generate or set if needed
                     'cost_price' => $request->input('variation_cost_price'),
                     'b2b_price' => $request->input('variation_b2b_price'),
@@ -94,15 +94,15 @@ class ProductController extends Controller
                     'productStatus' => 'active',
                 ]);
 
+                $variation = Variation::with(['product', 'variationSize', 'colorName', 'stocks'])
+                    ->find($variation->id);
 
                 // Return success response with product and variation data
                 return response()->json([
                     'status' => 201,
                     'message' => 'Product and variation created successfully.',
-                    'data' => [
-                        'product' => $product,
-                        'variation' => $variation,
-                    ],
+                    'product' => $product,
+                    'variation' => $variation,
                 ], 201);
             });
         } catch (\Exception $e) {

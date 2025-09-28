@@ -6,6 +6,7 @@ use App\Http\Controllers\Pos\PosPageController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Sale\SaleManageController;
 use App\Http\Controllers\Sale\SalePageController;
+use App\Http\Controllers\Stock\StockTrackingController;
 use App\Http\Controllers\Warranty\WarrantyController;
 use Illuminate\Support\Facades\Route;
 
@@ -59,5 +60,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/warranty/manage', 'index')->name('warranty.manage');
         Route::get('/warranty/card/{id}', 'warrantyCard');
         Route::delete('/warranty/delete/{id}', 'warrantyDelete');
+    });
+
+    // Stock tracking related route 
+    Route::controller(StockTrackingController::class)->group(function () {
+        Route::get('/stock/tracking', 'index');
     });
 });

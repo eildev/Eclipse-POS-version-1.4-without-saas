@@ -31,6 +31,21 @@ const useTableFieldHideShow = () => {
     const [showStartDate, setShowStartDate] = useState(1);
     const [showEndDate, setShowEndDate] = useState(1);
 
+    // StockTracking-specific states
+    const [showBranch, setShowBranch] = useState(1);
+    const [showVariation, setShowVariation] = useState(1);
+    const [showStockId, setShowStockId] = useState(1);
+    const [showBatchNumber, setShowBatchNumber] = useState(1);
+    const [showReferenceType, setShowReferenceType] = useState(1);
+    const [showReference, setShowReference] = useState(1);
+    const [showWarehouse, setShowWarehouse] = useState(1);
+    const [showRack, setShowRack] = useState(1);
+    //     const [showSize, setShowSize] = useState(1);
+    // const [showColor, setShowColor] = useState(1);
+    const [showB2BPrice, setShowB2BPrice] = useState(1);
+    const [showB2CPrice, setShowB2CPrice] = useState(1);
+    const [showCostPrice, setShowCostPrice] = useState(1);
+
     const setterFunctions = {
         showInvoice: setShowInvoice,
         showCustomer: setShowCustomer,
@@ -60,6 +75,18 @@ const useTableFieldHideShow = () => {
         showDuration: setShowDuration,
         showStartDate: setShowStartDate,
         showEndDate: setShowEndDate,
+
+        showBranch: setShowBranch,
+        showVariation: setShowVariation,
+        showStockId: setShowStockId,
+        showBatchNumber: setShowBatchNumber,
+        showReferenceType: setShowReferenceType,
+        showReference: setShowReference,
+        showWarehouse: setShowWarehouse,
+        showRack: setShowRack,
+        showB2BPrice: setShowB2BPrice,
+        showB2CPrice: setShowB2CPrice,
+        showCostPrice: setShowCostPrice,
     };
 
     const handleFieldChange = (fieldName, value) => {
@@ -72,6 +99,120 @@ const useTableFieldHideShow = () => {
             console.error(`Invalid field name: ${fieldName}`);
         }
     };
+
+    // Fields for StockTracking Manage Table
+    const stockTrackingManageTableFields = useMemo(
+        () => [
+            {
+                name: "showBranch",
+                label: "Branch",
+                type: "checkbox",
+                value: showBranch,
+            },
+            {
+                name: "showProduct",
+                label: "Product",
+                type: "checkbox",
+                value: showProduct,
+            },
+            {
+                name: "showVariation",
+                label: "Variation",
+                type: "checkbox",
+                value: showVariation,
+            },
+            {
+                name: "showStockId",
+                label: "Stock ID",
+                type: "checkbox",
+                value: showStockId,
+            },
+            {
+                name: "showBatchNumber",
+                label: "Batch Number",
+                type: "checkbox",
+                value: showBatchNumber,
+            },
+            {
+                name: "showReferenceType",
+                label: "Reference Type",
+                type: "checkbox",
+                value: showReferenceType,
+            },
+            {
+                name: "showReference",
+                label: "Reference",
+                type: "checkbox",
+                value: showReference,
+            },
+            {
+                name: "showQuantity",
+                label: "Quantity",
+                type: "checkbox",
+                value: showQuantity,
+            },
+            {
+                name: "showWarehouse",
+                label: "Warehouse",
+                type: "checkbox",
+                value: showWarehouse,
+            },
+            {
+                name: "showRack",
+                label: "Rack",
+                type: "checkbox",
+                value: showRack,
+            },
+
+            {
+                name: "showSize",
+                label: "Size",
+                type: "checkbox",
+                value: showSize,
+            },
+            {
+                name: "showColor",
+                label: "Color",
+                type: "checkbox",
+                value: showColor,
+            },
+            {
+                name: "showB2BPrice",
+                label: "B2B Price",
+                type: "checkbox",
+                value: showB2BPrice,
+            },
+            {
+                name: "showB2CPrice",
+                label: "B2C Price",
+                type: "checkbox",
+                value: showB2CPrice,
+            },
+            {
+                name: "showCostPrice",
+                label: "Cost Price",
+                type: "checkbox",
+                value: showCostPrice,
+            },
+        ],
+        [
+            showBranch,
+            showProduct,
+            showVariation,
+            showStockId,
+            showBatchNumber,
+            showReferenceType,
+            showReference,
+            showQuantity,
+            showWarehouse,
+            showRack,
+            showSize,
+            showColor,
+            showB2BPrice,
+            showB2CPrice,
+            showCostPrice,
+        ]
+    );
 
     // New warrantyManageTableFields
     const warrantyManageTableFields = useMemo(
@@ -344,12 +485,11 @@ const useTableFieldHideShow = () => {
         setShowSaleStatus,
         showAction,
         setShowAction,
-        handleFieldChange,
-        saleManageTableFields,
         showOrderType,
         showCourierStatus,
         showAdditionalCharge,
 
+        // Warranty-specific
         showProduct,
         setShowProduct,
         showColor,
@@ -362,7 +502,35 @@ const useTableFieldHideShow = () => {
         setShowStartDate,
         showEndDate,
         setShowEndDate,
+
+        // StockTracking-specific
+        showBranch,
+        setShowBranch,
+        showVariation,
+        setShowVariation,
+        showStockId,
+        setShowStockId,
+        showBatchNumber,
+        setShowBatchNumber,
+        showReferenceType,
+        setShowReferenceType,
+        showReference,
+        setShowReference,
+        showWarehouse,
+        setShowWarehouse,
+        showRack,
+        setShowRack,
+        showB2BPrice,
+        setShowB2BPrice,
+        showB2CPrice,
+        setShowB2CPrice,
+        showCostPrice,
+        setShowCostPrice,
+
+        handleFieldChange,
+        saleManageTableFields,
         warrantyManageTableFields,
+        stockTrackingManageTableFields,
     };
 };
 

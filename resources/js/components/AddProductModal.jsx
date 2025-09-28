@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import { useDropzone } from "react-dropzone";
@@ -12,6 +12,7 @@ const AddProductModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
     const [activeTab, setActiveTab] = useState("basic");
     const [formData, setFormData] = useState({
         productName: "",
+        variantName: "",
         color: null,
         size: null,
         costPrice: "",
@@ -51,6 +52,16 @@ const AddProductModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
             label: `${unit?.name ?? "N/A"}`,
         }));
     }, [units]);
+
+    // Set default unit when unitOptions are available
+    useEffect(() => {
+        if (unitOptions.length > 0 && !formData.unit) {
+            setFormData((prev) => ({
+                ...prev,
+                unit: unitOptions[0], // Set the first unit option as default
+            }));
+        }
+    }, [unitOptions]);
 
     // Category options
     const categoryOptions = useMemo(() => {
@@ -173,21 +184,21 @@ const AddProductModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
         if (!formData.productName) {
             newErrors.productName = "Product name is required.";
         }
-        if (!formData.color) {
-            newErrors.color = "Color is required.";
-        }
-        if (!formData.size) {
-            newErrors.size = "Size is required.";
-        }
+        // if (!formData.color) {
+        //     newErrors.color = "Color is required.";
+        // }
+        // if (!formData.size) {
+        //     newErrors.size = "Size is required.";
+        // }
         if (!formData.costPrice || parseFloat(formData.costPrice) <= 0) {
             newErrors.costPrice = "Cost price must be greater than 0.";
         }
         if (!formData.salePrice || parseFloat(formData.salePrice) <= 0) {
             newErrors.salePrice = "Sale price must be greater than 0.";
         }
-        if (!formData.unit) {
-            newErrors.unit = "Unit is required.";
-        }
+        // if (!formData.unit) {
+        //     newErrors.unit = "Unit is required.";
+        // }
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -198,11 +209,12 @@ const AddProductModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
         // Prepare data for submission
         const productData = {
             name: formData.productName,
-            color_id: formData.color?.value,
-            size_id: formData.size?.value,
+            variant_name: formData.variantName,
+            color_id: formData.color?.value || null,
+            size_id: formData.size?.value || null,
             cost_price: parseFloat(formData.costPrice),
             sale_price: parseFloat(formData.salePrice),
-            unit_id: formData.unit?.value,
+            unit_id: formData.unit?.value || null,
             category_id: formData.category?.value || null,
             subcategory_id: formData.subcategory?.value || null,
             brand_id: formData.brand?.value || null,
@@ -217,6 +229,7 @@ const AddProductModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
 
         setFormData({
             productName: "",
+            variantName: "",
             color: null,
             size: null,
             costPrice: "",
@@ -309,48 +322,6 @@ const AddProductModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs sm:text-sm font-medium text-text dark:text-text-dark mb-1">
-                                    Color *
-                                </label>
-                                <SelectSearch
-                                    options={colorOptions}
-                                    onSelect={(option) =>
-                                        handleSelectChange("color", option)
-                                    }
-                                    placeholder="Select color"
-                                    selectedValue={formData.color}
-                                    wrapperClass="w-full"
-                                    zIndex={50}
-                                    disabled={isLoading}
-                                />
-                                {errors.color && (
-                                    <span className="text-red-500 text-xs mt-1">
-                                        {errors.color}
-                                    </span>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block text-xs sm:text-sm font-medium text-text dark:text-text-dark mb-1">
-                                    Size *
-                                </label>
-                                <SelectSearch
-                                    options={sizeOptions}
-                                    onSelect={(option) =>
-                                        handleSelectChange("size", option)
-                                    }
-                                    placeholder="Select size"
-                                    selectedValue={formData.size}
-                                    wrapperClass="w-full"
-                                    zIndex={50}
-                                    disabled={isLoading}
-                                />
-                                {errors.size && (
-                                    <span className="text-red-500 text-xs mt-1">
-                                        {errors.size}
-                                    </span>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block text-xs sm:text-sm font-medium text-text dark:text-text-dark mb-1">
                                     Cost Price *
                                 </label>
                                 <input
@@ -392,6 +363,66 @@ const AddProductModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
                                 {errors.salePrice && (
                                     <span className="text-red-500 text-xs mt-1">
                                         {errors.salePrice}
+                                    </span>
+                                )}
+                            </div>
+                            <div>
+                                <label className="block text-xs sm:text-sm font-medium text-text dark:text-text-dark mb-1">
+                                    Variant Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.variantName}
+                                    onChange={(e) =>
+                                        handleInputChange(
+                                            "variantName",
+                                            e.target.value
+                                        )
+                                    }
+                                    className="w-full p-2 border rounded text-xs sm:text-sm bg-surface-light dark:bg-surface-dark text-text dark:text-text-dark focus:border-primary dark:focus:border-primary-dark focus:ring-1 focus:ring-primary dark:focus:ring-primary-dark transition-colors duration-200"
+                                    placeholder="Enter variant name"
+                                    disabled={isLoading}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs sm:text-sm font-medium text-text dark:text-text-dark mb-1">
+                                    Color
+                                </label>
+                                <SelectSearch
+                                    options={colorOptions}
+                                    onSelect={(option) =>
+                                        handleSelectChange("color", option)
+                                    }
+                                    placeholder="Select color"
+                                    selectedValue={formData.color}
+                                    wrapperClass="w-full"
+                                    zIndex={50}
+                                    disabled={isLoading}
+                                />
+                                {errors.color && (
+                                    <span className="text-red-500 text-xs mt-1">
+                                        {errors.color}
+                                    </span>
+                                )}
+                            </div>
+                            <div>
+                                <label className="block text-xs sm:text-sm font-medium text-text dark:text-text-dark mb-1">
+                                    Size
+                                </label>
+                                <SelectSearch
+                                    options={sizeOptions}
+                                    onSelect={(option) =>
+                                        handleSelectChange("size", option)
+                                    }
+                                    placeholder="Select size"
+                                    selectedValue={formData.size}
+                                    wrapperClass="w-full"
+                                    zIndex={50}
+                                    disabled={isLoading}
+                                />
+                                {errors.size && (
+                                    <span className="text-red-500 text-xs mt-1">
+                                        {errors.size}
                                     </span>
                                 )}
                             </div>
