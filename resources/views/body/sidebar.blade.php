@@ -199,13 +199,13 @@
             @endphp
 
             @if ($affliator_setting)
-                <li class="nav-item nav-category">Affliate Management</li>
+                <li class="nav-item nav-category">Other Modules</li>
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('affliator*') ? '' : 'collapsed' }}"
                         data-bs-toggle="collapse" href="#affliator-index" role="button" aria-expanded="false"
                         aria-controls="forms">
                         <i class="ms-2 link-icon" data-feather="file-text"></i>
-                        <span class="link-title">Affliate</span>
+                        <span class="link-title">Affliate Management</span>
                         <i class="link-arrow" data-feather="chevron-down"></i>
                     </a>
                     <div class="collapse {{ request()->routeIs('affliator.index*') ? 'show' : '' }}"
@@ -235,7 +235,7 @@
             @endif
 
             @if (Auth::user()->can('purchase.menu'))
-                <li class="nav-item nav-category">Purchase </li>
+                {{-- <li class="nav-item nav-category">Purchase </li> --}}
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('purchase*') ? '' : 'collapsed' }}"
                         data-bs-toggle="collapse" href="#purchase-add" role="button" aria-expanded="false"
@@ -301,13 +301,13 @@
             {{-- ///////////////////////////////////////////---- POS End ----//////////////////////////////////////// --}}
             {{-- //////////////////////////////---- Store Management ----/////////////////////////////// --}}
             @if (Auth::user()->can('products.menu'))
-                <li class="nav-item nav-category">Store Management</li>
+                {{-- <li class="nav-item nav-category">Store Management</li> --}}
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('product*') ? '' : 'collapsed' }}"
                         data-bs-toggle="collapse" href="#product-add" role="button" aria-expanded="false"
                         aria-controls="forms">
                         <i class="ms-2 link-icon" data-feather="file-text"></i>
-                        <span class="link-title">Product Management</span>
+                        <span class="link-title">Store Management</span>
                         <i class="link-arrow" data-feather="chevron-down"></i>
                     </a>
                     <div class="collapse {{ request()->routeIs('product*') ? 'show' : '' }}" id="product-add">
@@ -413,7 +413,7 @@
     </div>
     </li>
     @if (Auth::user()->can('all.party'))
-        <li class="nav-item nav-category">Party Management</li>
+        {{-- <li class="nav-item nav-category">Party Management</li> --}}
     @endif
     <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('party*') ? '' : 'collapsed' }}" data-bs-toggle="collapse"
@@ -473,7 +473,7 @@
 
     {{-- ////////////////////////////////////---- Accounting----//////////////////////////////// --}}
     @if (Auth::user()->can('bank.menu'))
-        <li class="nav-item nav-category">Accounting</li>
+        {{-- <li class="nav-item nav-category">Accounting</li> --}}
         {{-- <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('Accounting*') ? '' : 'collapsed' }}"
                     data-bs-toggle="collapse" href="#Accounting" role="button" aria-expanded="false"
@@ -627,7 +627,7 @@
     {{-- ////////////////////////////////////---- Accounting End----//////////////////////////////// --}}
     {{-- //////////////////////--- Human Resource Management (HRM)----///////////////////// --}}
     @if (Auth::user()->can('employee.menu'))
-        <li class="nav-item nav-category">HRM</li>
+        {{-- <li class="nav-item nav-category">HRM</li> --}}
     @endif
     <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('employee*') ? '' : 'collapsed' }}" data-bs-toggle="collapse"
@@ -685,7 +685,7 @@
     {{-- ///////////////////---- Human Resource Management (HRM) End----////////////////// --}}
     {{-- ///////////////////---- Customer Relationship Manager (CRM)----////////////////// --}}
     @if (Auth::user()->can('crm.menu'))
-        <li class="nav-item nav-category">CRM</li>
+        {{-- <li class="nav-item nav-category">CRM</li> --}}
 
         <li class="nav-item">
             <a class="nav-link {{ request()->routeIs('crm*') ? '' : 'collapsed' }}" data-bs-toggle="collapse"
@@ -724,14 +724,14 @@
     {{-- ////////////////////////Courier management//////////////// --}}
 
     @if ($courier_management === 1)
-        <li class="nav-item nav-category">Courier Management</li>
+        {{-- <li class="nav-item nav-category">Courier Management</li> --}}
 
 
         <li class="nav-item">
             <a class="nav-link " data-bs-toggle="collapse" href="#CourierOrder" role="button"
                 aria-expanded="false" aria-controls="courier_order">
                 <i class="ms-2 fa-solid fa-users-gear link-icon"></i>
-                <span class="link-title">Courier Order</span>
+                <span class="link-title">Courier Management</span>
                 <i class="link-arrow" data-feather="chevron-down"></i>
             </a>
             <div class="collapse " id="CourierOrder">
@@ -791,7 +791,7 @@
 
     {{-- ////////////////////////////////////---- Inventory----//////////////////////////////// --}}
     @if (Auth::user()->can('Inventory.menu'))
-        <li class="nav-item nav-category">Inventory</li>
+        {{-- <li class="nav-item nav-category">Inventory</li> --}}
 
         <!---Stock --->
         <li class="nav-item">
