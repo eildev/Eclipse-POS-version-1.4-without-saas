@@ -24,6 +24,7 @@ use App\Repositories\RepositoryInterfaces\CustomerInterfaces;
 use App\Repositories\RepositoryInterfaces\DamageInterface;
 use App\Repositories\RepositoryInterfaces\EmployeeInterface;
 use App\Repositories\RepositoryInterfaces\SubCategoryInterface;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -51,6 +52,18 @@ class AppServiceProvider extends ServiceProvider
         Product::observe(ProductObserver::class);
         Variation::observe(VariationObserver::class);
         Stock::observe(StockObserver::class);
+
+        Relation::morphMap([
+            'sale' => \App\Models\Sale::class,
+            'purchase' => \App\Models\Purchase::class,
+            'return' => \App\Models\Returns::class,
+            'damage' => \App\Models\Damage::class,
+            'stock_transfer' => \App\Models\StockTransfer::class,
+            'stock_adjustment' => \App\Models\StockAdjustment::class,
+            'quick_purchase' => \App\Models\Purchase::class,
+            'opening_stock' => \App\Models\Product::class,
+            'bulk_update' => \App\Models\Product::class,
+        ]);
     }
     // public function boot()
     // {

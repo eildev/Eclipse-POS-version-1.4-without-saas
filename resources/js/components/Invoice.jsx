@@ -1,7 +1,8 @@
 import { Head, usePage } from "@inertiajs/react";
 import cn from "../utils/cn";
+import { useEffect } from "react";
 
-const Invoice = () => {
+const Invoice = ({ setIsReady }) => {
     const { props } = usePage();
     const { sale, customer, products, setting } = props;
 
@@ -21,6 +22,12 @@ const Invoice = () => {
         invoice_payment,
         invoice_type,
     } = setting;
+
+    useEffect(() => {
+        if (!logo) {
+            setIsReady(true); // No logo, so ready immediately
+        }
+    }, [logo, setIsReady]);
 
     return (
         <div className="min-h-screen bg-white text-gray-800 font-sans text-sm ">
@@ -43,6 +50,7 @@ const Invoice = () => {
                                     src={`/${logo}`}
                                     alt="logo"
                                     className="h-16 w-32 -ml-2"
+                                    onLoad={() => setIsReady(true)}
                                 />
                             ) : (
                                 <p className="mt-1 mb-1 font-bold text-base">
@@ -56,6 +64,7 @@ const Invoice = () => {
                                         src={`/${logo}`}
                                         alt="logo"
                                         className="h-16 w-32 -ml-2"
+                                        onLoad={() => setIsReady(true)}
                                     />
                                 )}
                                 <p className="mt-1 mb-1 font-bold text-base">
@@ -90,9 +99,14 @@ const Invoice = () => {
                         <h4 className="font-bold uppercase text-base mt-2 mb-1">
                             Invoice
                         </h4>
-                        <h6 className="mb-3 text-sm">
+                        <h6 className="mb-0 text-sm">
                             # INV-{sale?.invoice_number ?? 0}
                         </h6>
+                        <h6 className="text-xs font-medium border-gray-500 inline-block">
+                            <strong>Invoice by:</strong>{" "}
+                            {sale?.sale_by?.name ?? "N/A"}
+                        </h6>
+
                         {sale?.due > 0 ? (
                             <>
                                 <p className="mb-1 mt-4 text-xs">Due</p>
@@ -214,7 +228,10 @@ const Invoice = () => {
                                         </tr>
                                     ))}
                                     {Array.from({
-                                        length: 16 - products.length,
+                                        length:
+                                            invoice_type === "a4"
+                                                ? 15 - products.length
+                                                : 10 - products.length,
                                     }).map((_, i) => (
                                         <tr
                                             key={i + products.length}
@@ -416,12 +433,6 @@ const Invoice = () => {
                         </a>
                     )}
                 </div>
-                <div className="mt-4">
-                    <h5 className="text-sm font-semibold">Invoice by:</h5>
-                    <h6 className="text-xs font-medium border-b border-gray-500 inline-block">
-                        {sale?.sale_by?.name ?? "N/A"}
-                    </h6>
-                </div>
             </div>
 
             <style jsx>
@@ -430,7 +441,7 @@ const Invoice = () => {
                         ${invoice_type === "a4"
                             ? "@page { size: A4; margin: 10mm; }"
                             : invoice_type === "a5"
-                            ? "@page { size: A5; margin: 10mm; }"
+                            ? "@page { size: A5; margin: 4mm; }"
                             : "@page { size: auto; margin: 10mm; }"}
 
                         aside, nav, footer, .print-button {
@@ -461,7 +472,7 @@ const Invoice = () => {
                           display: table-footer-group;
                         }
                         tr {
-                          page-break-inside: avoid; / row ভাঙবে না /
+                          page-break-inside: avoid; 
                           page-break-after: auto;
                         }
                     

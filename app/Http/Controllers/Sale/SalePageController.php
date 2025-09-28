@@ -479,7 +479,7 @@ class SalePageController extends Controller
         $variantIds = collect($request->variants)->pluck('variantId');
         $settings = PosSetting::first();
 
-        process_stock_operations($request->variants, $branchId, $allVariants, $saleId, 'sale');
+        process_stock_operations($request->variants, $branchId, $allVariants, $saleId, 'sale', $request->customer_id);
 
         $paid = $request->paid > $request->grand_total ? $request->grand_total : $request->paid;
 
@@ -920,6 +920,8 @@ class SalePageController extends Controller
                         'quantity' => $product['qty'],
                         'warehouse_id' => $negativeStock->warehouse_id ?? null,
                         'rack_id' => $negativeStock->rack_id ?? null,
+                        'party_id' => $validated['supplier_id'] ?? null,
+                        'created_by' => Auth::user()->id ?? null,
                         'created_at' => Carbon::now(),
                     ]);
                 } else {
@@ -946,6 +948,8 @@ class SalePageController extends Controller
                         'quantity' => $product['qty'],
                         'warehouse_id' => $stock->warehouse_id ?? null,
                         'rack_id' => $stock->rack_id ?? null,
+                        'party_id' => $validated['supplier_id'] ?? null,
+                        'created_by' => Auth::user()->id ?? null,
                         'created_at' => Carbon::now(),
                     ]);
                 }
@@ -1005,5 +1009,75 @@ class SalePageController extends Controller
                 'message' => 'Failed to complete purchase: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+
+    public function duplicateInvoice($id)
+    {
+        // try {
+        $user = Auth::user();
+        $setting = PosSetting::latest()->first();
+        $warehouseSetting = WarehouseSetting::latest()->first();
+        $affiliates = Affiliator::where('branch_id', Auth::user()->branch_id)
+            ->whereNull('user_id')
+            ->get();
+        $customers = Customer::where('branch_id', Auth::user()->branch_id)->where('party_type', '<>', 'supplier')->get();
+        $products = Variation::where('productStatus', 'active')
+            ->whereHas('product', function ($query) {
+                $query->where('status', 'active');
+                $query->where('product_type', 'own_goods');
+            })
+            ->with(['product', 'variationSize', 'colorName', 'stocks.warehouse', 'stocks.racks'])
+            ->get();
+
+        $quickPurchaseProducts = Variation::where('productStatus', 'active')
+            ->whereHas('product', function ($query) {
+                $query->where('status', 'active');
+                $query->where('product_type', 'via_goods');
+            })
+            ->with(['product', 'variationSize', 'colorName', 'stocks.warehouse', 'stocks.racks'])
+            ->get();
+
+        $banks = Bank::get();
+        $taxes = Tax::get();
+        $additionalChargeNames = AdditionalChargeName::get();
+
+        $colors = Color::latest()->get();
+        $sizes = Psize::latest()->get();
+        $units = Unit::latest()->get();
+        $categories = Category::where('status', 1)->latest()->get();
+        $subcategories = SubCategory::where('status', 1)->latest()->get();
+        $brands = Brand::latest()->get();
+
+        $suppliers = Customer::where('branch_id', Auth::user()->branch_id)->where('party_type', '<>', 'customer')->get();
+        $sale = Sale::findOrFail($id);
+        $saleItems = SaleItem::where("sale_id", $id)->with('variant.product', 'variant.stocks', 'variant.stocks.warehouse', 'variant.stocks.racks', 'variant.variationSize', 'variant.colorName')->get();
+
+
+        return Inertia::render('Sale/Sale', [
+            'setting' => $setting,
+            'affiliates' => $affiliates,
+            'customers' => $customers,
+            'products' => $products,
+            'banks' => $banks,
+            'taxes' => $taxes,
+            'warehouseSetting' => $warehouseSetting,
+            'additionalChargeNames' => $additionalChargeNames,
+            'user' => $user,
+            'quickPurchaseProducts' => $quickPurchaseProducts,
+            'colors' => $colors,
+            'sizes' => $sizes,
+            'units' => $units,
+            'categories' => $categories,
+            'subcategories' => $subcategories,
+            'brands' => $brands,
+            'suppliers' => $suppliers,
+            'duplicateSale' => $sale,
+            'duplicateSaleItems' => $saleItems,
+        ]);
+        // } catch (\Exception $e) {
+        //     Log::error('Error in posPrintInvoice method: ' . $e->getMessage());
+        //     return response()->view('errors.500', ['message' => 'Something went wrong. Please try again later.'], 500);
+        // }
     }
 }

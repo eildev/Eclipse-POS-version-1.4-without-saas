@@ -26,7 +26,7 @@ function generate_batch_number()
 {
     return App\Helpers\GenerateBatchNumber::generateUniqueBatchNumber();
 }
-function process_stock_operations($variants, $branchId, $allVariants, $referenceId, $referenceType = 'sale')
+function process_stock_operations($variants, $branchId, $allVariants, $referenceId, $referenceType = 'sale', $partyId)
 {
-    return App\Helpers\StockHelper::processStockOperations($variants, $branchId, $allVariants, $referenceId, $referenceType);
+    return App\Helpers\StockHelper::processStockOperations($variants, $branchId, $allVariants, $referenceId, $referenceType, $partyId);
 }

@@ -38,23 +38,17 @@ class StockTracking extends Model
     {
         return $this->belongsTo(Stock::class, 'stock_id');
     }
+    public function party()
+    {
+        return $this->belongsTo(Customer::class, 'party_id');
+    }
+    public function stock_by()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 
     public function reference()
     {
-        $modelMap = [
-            'sale' => \App\Models\Sale::class,
-            'purchase' => \App\Models\Purchase::class,
-            'return' => \App\Models\Returns::class,
-            'damage' => \App\Models\Damage::class,
-            'stock_transfer' => \App\Models\StockTransfer::class,
-            'stock_adjustment' => \App\Models\StockAdjustment::class,
-            'quick_purchase' => \App\Models\Purchase::class,
-            'opening_stock' => \App\Models\Product::class,
-            'bulk_update' => \App\Models\Product::class,
-        ];
-
-        $modelClass = $modelMap[$this->reference_type] ?? \App\Models\Product::class; // Default to Product if invalid
-
-        return $this->belongsTo($modelClass, 'reference_id');
+        return $this->morphTo(__FUNCTION__, 'reference_type', 'reference_id');
     }
 }

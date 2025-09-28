@@ -68,7 +68,7 @@ class DamageController extends Controller
                 $damage->save();
 
 
-                process_stock_operations($variants, Auth::user()->branch_id, $allVariants, $damage->id, 'damage');
+                process_stock_operations($variants, Auth::user()->branch_id, $allVariants, $damage->id, 'damage', null);
             }
         }
 

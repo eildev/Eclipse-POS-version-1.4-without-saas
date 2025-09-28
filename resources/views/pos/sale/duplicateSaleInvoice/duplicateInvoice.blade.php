@@ -18,19 +18,22 @@
             background: #0d6efd;
             color: white;
         }
-            /* ///drag & drop// */
-            .responsive-table {
+
+        /* ///drag & drop// */
+        .responsive-table {
             overflow: auto;
-            }
-            table {
+        }
+
+        table {
             width: 100%;
             border-spacing: 0;
             border-collapse: collapse;
-            white-space:nowrap;
-            }
-            .duplicate_invoices{
+            white-space: nowrap;
+        }
+
+        .duplicate_invoices {
             cursor: move;
-            }
+        }
     </style>
 
     @php
@@ -39,7 +42,8 @@
             ->get();
 
         if ($tax == 1) {
-            $taxPercentage = App\Models\Tax::first()->percentage;
+            $taxRecord = App\Models\Tax::first();
+            $taxPercentage = $taxRecord ? $taxRecord->percentage : 0; // Default to 0 if null
         } else {
             $taxPercentage = null;
         }
@@ -83,9 +87,16 @@
                                     @foreach ($products as $product)
                                         <option value="{{ $product->id }}">{{ $product->name }}
                                             ({{ $product->stockQuantity->sum('stock_quantity') ?? 0 }}
-                                            {{ $product->productUnit->name ?? '' }}  Available)
-                                            @if (in_array(Auth::user()->role, ['superadmin','admin']))| Cost Price: {{$product->defaultVariations->cost_price ?? 'N/A'}} | B2B Price: {{$product->defaultVariations->b2b_price ?? 'N/A'}} | B2C Price: {{$product->defaultVariations->b2c_price ?? 'N/A'}} @endif
-                                            @if (in_array(Auth::user()->role, ['salesman']))| B2B Price: {{$product->defaultVariations->b2b_price ?? 'N/A'}} | B2C Price: {{$product->defaultVariations->b2c_price ?? 'N/A'}} @endif
+                                            {{ $product->productUnit->name ?? '' }} Available)
+                                            @if (in_array(Auth::user()->role, ['superadmin', 'admin']))
+                                                | Cost Price: {{ $product->defaultVariations->cost_price ?? 'N/A' }} | B2B
+                                                Price: {{ $product->defaultVariations->b2b_price ?? 'N/A' }} | B2C Price:
+                                                {{ $product->defaultVariations->b2c_price ?? 'N/A' }}
+                                            @endif
+                                            @if (in_array(Auth::user()->role, ['salesman']))
+                                                | B2B Price: {{ $product->defaultVariations->b2b_price ?? 'N/A' }} | B2C
+                                                Price: {{ $product->defaultVariations->b2c_price ?? 'N/A' }}
+                                            @endif
                                         </option>
                                     @endforeach
                                 @else
@@ -142,7 +153,7 @@
                                         <th>Warranty</th>
                                     @endif
                                     @if ($sale_hands_on_discount == 1)
-                                    <th>Discount</th>
+                                        <th>Discount</th>
                                     @endif
                                     <th>Sub Total</th>
                                     <th>
@@ -169,21 +180,20 @@
                                 value="0.00" />
                         </div>
                     </div>
-                    @if($discount  ===1)
-                    <div class="row align-items-center mb-2 ">
-                        <div class="col-sm-4">
-                            Discount :
+                    @if ($discount === 1)
+                        <div class="row align-items-center mb-2 ">
+                            <div class="col-sm-4">
+                                Discount :
+                            </div>
+                            <div class="col-sm-8 d-flex justify-content-start">
+                                <select name="duplicate_sale_discount_type" class="px-2 duplicate_sale_discount_type ">
+                                    <option value="fixed">৳</option>
+                                    <option value="percentage">%</option>
+                                </select>
+                                <input type="number" class="form-control handsOnDiscount text-end" name=""
+                                    value="" />
+                            </div>
                         </div>
-                        <div class="col-sm-8 d-flex justify-content-start">
-                            <select name="duplicate_sale_discount_type" class="px-2 duplicate_sale_discount_type "
-                            >
-                                 <option value="fixed">৳</option>
-                                 <option value="percentage">%</option>
-                             </select>
-                            <input type="number" class="form-control handsOnDiscount text-end" name=""
-                                value="" />
-                        </div>
-                    </div>
                     @endif
                     @if ($tax == 1)
                         <div class="row align-items-center mb-2 ">
@@ -534,20 +544,21 @@
         let drag_and_drop = "{{ $drag_and_drop }}";
         let sale_with_low_price = "{{ $sale_with_low_price }}";
         let sale_without_stock = "{{ $sale_without_stock }}";
-        if(drag_and_drop === "1"){
-        $("#sortable tbody").sortable({
-            cursor: "move",
-            placeholder: "sortable-placeholder",
-            helper: function(e, tr) {
-                var $originals = tr.children();
-                var $helper = tr.clone();
-                $helper.children().each(function(index) {
-                    $(this).width($originals.eq(index).width());
-                });
-                return $helper;
-            }
-        }).disableSelection();
-    }
+        if (drag_and_drop === "1") {
+            $("#sortable tbody").sortable({
+                cursor: "move",
+                placeholder: "sortable-placeholder",
+                helper: function(e, tr) {
+                    var $originals = tr.children();
+                    var $helper = tr.clone();
+                    $helper.children().each(function(index) {
+                        $(this).width($originals.eq(index).width());
+                    });
+                    return $helper;
+                }
+            }).disableSelection();
+        }
+
         function generateInvoice() {
             let invoice_number = '{{ rand(123456, 99999) }}';
             $('.generate_invoice').val(invoice_number);
