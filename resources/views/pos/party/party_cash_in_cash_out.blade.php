@@ -300,10 +300,10 @@
 
 
                                 if (dueStatement.sale) {
-                                    totalDue = (parseFloat(dueStatement.sale.change_amount) || 0) -
+                                    totalDue = (parseFloat(dueStatement.sale.grand_total) || 0) -
                                             (parseFloat(dueStatement.sale.paid) || 0);
                                     invoiceNumber = dueStatement.sale.invoice_number ?? 'N/A';
-                                    totalAmount = dueStatement.sale.change_amount ?? '';
+                                    totalAmount = dueStatement.sale.grand_total ?? '';
                                     paidAmount = dueStatement.sale.paid ?? '';
                                     saleId = dueStatement.sale.id ?? '';
                                 } else if (dueStatement.service_sale) {
