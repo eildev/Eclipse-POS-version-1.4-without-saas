@@ -230,12 +230,6 @@ const usePosSettings = () => {
                 value: viaSale,
             },
             {
-                name: "selected_product_alert",
-                label: "Selected Product Alert",
-                type: "checkbox",
-                value: selectedProductAlert,
-            },
-            {
                 name: "rate_kit",
                 label: "Rate Kit",
                 type: "checkbox",
@@ -279,7 +273,6 @@ const usePosSettings = () => {
             salePriceType,
             rateKit,
             rateKitType,
-            selectedProductAlert,
             saleWithLowPrice,
         ]
     );

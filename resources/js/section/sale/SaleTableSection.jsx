@@ -44,7 +44,6 @@ const SaleTableSection = ({
         rateKit,
         rateKitType,
         sellingPriceEdit,
-        selectedProductAlert,
         saleWithLowPrice,
         saleWithoutStock,
     } = settings;
@@ -900,9 +899,6 @@ const SaleTableSection = ({
                                             row={row}
                                             rowIndex={rowIndex}
                                             user={user}
-                                            selectedProductAlert={
-                                                selectedProductAlert
-                                            }
                                             productOptions={productOptions}
                                             getFilteredOptions={
                                                 getFilteredOptions
