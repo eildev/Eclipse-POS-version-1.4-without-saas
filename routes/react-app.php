@@ -32,7 +32,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/pos-page', 'index')->name('pos.page');
     });
 
-    // sale manage related Route 
+    // sale manage related Route
     Route::controller(SaleManageController::class)->group(function () {
         Route::get('/sale-table/manage', "saleTable")->name('sale.table.manage');
         Route::delete('/sale/delete/{id}', 'destroy');
@@ -41,30 +41,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
 
-    // sale manage related Route 
+    // sale manage related Route
     Route::controller(ProductController::class)->group(function () {
         Route::post('/via-product/store', 'store');
     });
 
-    // goods related route 
+    // goods related route
     Route::controller(GoodsController::class)->group(function () {
         Route::get('/goods-new', 'index')->name('goods.new');
     });
 
-    // additional charge related route 
+    // additional charge related route
     Route::controller(AdditionalChargeController::class)->group(function () {
         Route::post('/additional-charge-name/store', 'store');
     });
 
-    // Warranty related route 
+    // Warranty related route
     Route::controller(WarrantyController::class)->group(function () {
         Route::get('/warranty/manage', 'index')->name('warranty.manage');
         Route::get('/warranty/card/{id}', 'warrantyCard');
         Route::delete('/warranty/delete/{id}', 'warrantyDelete');
     });
 
-    // Stock tracking related route 
+    // Stock tracking related route
     Route::controller(StockTrackingController::class)->group(function () {
-        Route::get('/stock/tracking', 'index');
+        Route::get('/stock/tracking', 'index')->name('stock.tracking.manage');
     });
 });

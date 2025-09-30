@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('branch_id')->unsigned();
             $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');
             $table->bigInteger('reference_id')->nullable();
-            $table->enum('purpose', ['sale', 'purchase', 'sale_edit', 'purchase_edit', 'return', 'service_sale', 'service_sale_payments', 'transaction', 'bank', 'expanse', 'expanse_edit', 'salary', 'party_pay', 'party_receive', 'investor_pay', 'investor_receive', 'from_bank_transfer', 'to_bank_transfer', 'to_bank_transfer_update', 'from_bank_transfer_update', 'bank_adjustments_decrease', 'bank_adjustments_increase', 'quick_purchase', 'affliate_payment', 'bank_opening_balance'])->nullable();
+            $table->enum('purpose', ['sale', 'purchase', 'sale_edit', 'purchase_edit', 'return', 'service_sale', 'service_sale_payments', 'transaction', 'bank', 'expanse', 'expanse_edit', 'salary', 'party_pay', 'party_receive', 'investor_pay', 'investor_receive', 'from_bank_transfer', 'to_bank_transfer', 'to_bank_transfer_update', 'from_bank_transfer_update', 'bank_adjustments_decrease', 'bank_adjustments_increase', 'quick_purchase', 'affliate_payment', 'bank_opening_balance','loan','loan_repayments'])->nullable();
             $table->decimal('debit', 12, 2)->default(0);
             $table->decimal('credit', 12, 2)->default(0);
             $table->text('note')->nullable();
