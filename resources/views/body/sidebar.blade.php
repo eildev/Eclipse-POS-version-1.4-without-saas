@@ -409,6 +409,13 @@
                     </li>
                 @endif
             @endif
+            <li class="nav-item">
+                    <a href="{{ route('warranty.manage') }}"
+                        class="nav-link {{ request()->routeIs('warranty.manage') ? 'nav_active' : '' }}">
+                        <i class="ms-2 fa-solid fa-tags link-icon"></i>
+                        <span class="link-title">Warranty Manage</span>
+                    </a>
+                </li>
             <!---Promotion--->
             {{-- @if (Auth::user()->can('promotion.menu'))
         <li class="nav-item">
@@ -539,53 +546,54 @@
                         </li>
                     @endif
 
-                <!---Bank End--->
+                    <!---Bank End--->
 
-                <!---Expense--->
-                @if (Auth::user()->can('expense.menu'))
+                    <!---Expense--->
+                    @if (Auth::user()->can('expense.menu'))
+                        <li class="nav-item">
+                            <a href="{{ route('expense.view') }}"
+                                class="nav-link {{ request()->routeIs('expense.view') ? 'nav_active' : '' }}">
+                                <i class="ms-2 fa-solid fa-money-bill-transfer link-icon"></i>
+                                <span class="link-title">Expense</span>
+                            </a>
+                        </li>
+                    @endif
+                    @if (Auth::user()->can('service.sale'))
+                        <li class="nav-item">
+                            <a href="{{ route('service.sale') }}"
+                                class="nav-link {{ request()->routeIs('service.sale') ? 'nav_active' : '' }}">
+                                <i class="ms-2 fa-solid fa-money-bill-transfer link-icon"></i>
+                                <span class="link-title">Service Sale</span>
+
+                            </a>
+                        </li>
+                    @endif
+                    <!---Expense End--->
+                    <!---Transaction--->
+
+
                     <li class="nav-item">
-                        <a href="{{ route('expense.view') }}"
-                            class="nav-link {{ request()->routeIs('expense.view') ? 'nav_active' : '' }}">
-                            <i class="ms-2 fa-solid fa-money-bill-transfer link-icon"></i>
-                            <span class="link-title">Expense</span>
-                        </a>
+                        <a id="report" href="{{ route('transaction.add') }}"
+                            class="nav-link {{ request()->routeIs('transaction.add') ? 'nav_active' : '' }}">
+                            <i class="ms-2 link-icon" data-feather="file-text"></i>
+                            <span class="link-title">Investor Transaction </span></a>
                     </li>
-                @endif
-                @if (Auth::user()->can('service.sale'))
-                    <li class="nav-item">
-                        <a href="{{ route('service.sale') }}"
-                            class="nav-link {{ request()->routeIs('service.sale') ? 'nav_active' : '' }}">
-                            <i class="ms-2 fa-solid fa-money-bill-transfer link-icon"></i>
-                            <span class="link-title">Service Sale</span>
 
-                        </a>
-                    </li>
-                @endif
-    <!---Expense End--->
-    <!---Transaction--->
+                    <!---Transaction End--->
 
+                    @if (Auth::user()->can('account.transaction.report'))
+                        <li class="nav-item">
+                            <a href="{{ route('report.account.transaction') }}"
+                                class="nav-link {{ request()->routeIs('report.account.transaction') ? 'nav_active' : '' }}">
+                                <i class="ms-2 link-icon" data-feather="file-text"></i>
+                                <span class="link-title">Account Trans. Report </span></a>
+                        </li>
+                    @endif
 
-    <li class="nav-item">
-        <a id="report" href="{{ route('transaction.add') }}"
-            class="nav-link {{ request()->routeIs('transaction.add') ? 'nav_active' : '' }}">
-            <i class="ms-2 link-icon" data-feather="file-text"></i>
-            <span class="link-title">Investor Transaction </span></a>
-    </li>
-
-    <!---Transaction End--->
-
-    @if (Auth::user()->can('account.transaction.report'))
-        <li class="nav-item">
-            <a href="{{ route('report.account.transaction') }}"
-                class="nav-link {{ request()->routeIs('report.account.transaction') ? 'nav_active' : '' }}">
-                <i class="ms-2 link-icon" data-feather="file-text"></i>
-                <span class="link-title">Account Trans. Report </span></a>
+                </ul>
+            </div>
         </li>
     @endif
- @endif
-    </ul>
-    </div>
-    </li>
     <!---Promotion End--->
     {{-- </ul>
                 </div>
@@ -851,12 +859,21 @@
                         </li>
                     @endif
 
+                        <li class="nav-item">
+                            <a href="{{ route('stock.tracking.manage') }}"
+                                class="nav-link {{ request()->routeIs('stock.tracking.manage') ? 'nav_active' : '' }}">
+                                <i class="ms-2 link-icon" data-feather="corner-down-right"></i>
+                                <span class="link-title">Stock Tracking Manage</span>
+                            </a>
+                        </li>
+
+
                     @if (Auth::user()->can('warehouse.list'))
                         <li class="nav-item">
                             <a href="{{ route('wearhouse') }}"
                                 class="nav-link {{ request()->routeIs('wearhouse') ? 'nav_active' : '' }}">
                                 <i class="ms-2 link-icon" data-feather="corner-down-right"></i>
-                                <span class="link-title">Wearhouse/Go-Down</span>
+                                <span class="link-title">Wearhouse/Godown</span>
                             </a>
                         </li>
                     @endif

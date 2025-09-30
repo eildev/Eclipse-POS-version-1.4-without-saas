@@ -42,14 +42,18 @@
                                             data-bs-target="#edit">
                                             {{ $acountData->transaction_id }}
                                         </a>
-                                    @elseif($acountData->purpose == 'party_receive' && $acountData->partystatement->status == 'unused')
+                                     @elseif(
+                                            $acountData->purpose == 'party_receive'
+                                            && $acountData->partystatement
+                                            && $acountData->partystatement->status == 'unused'
+                                        )
                                         <a href="#" class="party_receive_pay_edit"
-                                            data-transaction-id="{{ $acountData->id }}" {{-- Assuming $acountData is defined; fix typo if it's $accountData --}}
+                                            data-transaction-id="{{ $acountData->id }}"
                                             data-bs-toggle="modal" data-bs-target="#party_receive_pay_edit">
                                             {{ $acountData->transaction_id }}
                                         </a>
                                     @else
-                                        {{ $acountData->transaction_id }}
+                                      {{ $acountData->transaction_id }}
                                     @endif
 
                                 </td>

@@ -98,18 +98,7 @@ class LoanController extends Controller
             $accountTransaction->created_at = Carbon::now();
             $accountTransaction->save();
 
-            // $transaction = new Transaction;
-            // $transaction->date = $request->start_date;
-            // $transaction->processed_by = Auth::user()->id;
-            // $transaction->payment_type = 'receive';
-            // $transaction->particulars = 'loan';
-            // $transaction->others_id = $loan->id; // loan id
-            // $transaction->payment_method = $request->bank_loan_account_id;
-            // $transaction->credit = $request->loan_principal;
-            // $transaction->debit = 0;
-            // $transaction->balance = -$request->loan_principal;
-            // $transaction->branch_id = Auth::user()->branch_id;
-            // $transaction->save();
+
 
             return response()->json([
                 'status' => 200,
@@ -196,8 +185,7 @@ class LoanController extends Controller
             }
 
             $account_balance = Bank::findOrFail($request->payment_account_id);
-            if ($account_balance->update_balance > 0 && $account_balance->update_balance >= $request->payment_balance) {
-                // loan repayments
+
                 $loan_repayments = new LoanRepayments;
                 $loan_repayments->branch_id = Auth::user()->branch_id;
                 $loan_repayments->loan_id = $request->data_id;
@@ -217,49 +205,27 @@ class LoanController extends Controller
                 $loan_repayments->principal_paid = $loan_principal / $total_duration;
                 $loan_repayments->interest_paid = $loan_interest / $total_duration;
                 $loan_repayments->total_paid = $request->payment_balance;
-
                 $loan_repayments->bank_account_id = $request->payment_account_id;
                 $loan_repayments->save();
 
                 $bank = Bank::findOrFail($request->payment_account_id);
-                $bank->update_balance -= $request->payment_balance;
+                $bank->current_balance -= $request->payment_balance;
+                $bank->total_debit += $request->payment_balance;
                 $bank->save();
 
-                //  create new accountTransaction
-                $accountTransaction = new AccountTransaction;
-                $accountTransaction->branch_id = Auth::user()->branch_id;
-                $accountTransaction->processed_by = Auth::user()->id;
-                $accountTransaction->purpose = 'loanRepayments';
-                $accountTransaction->reference_id = $request->data_id; // loan id
-                $accountTransaction->account_id = $request->payment_account_id;
-                $accountTransaction->debit = $request->payment_balance;
-                $oldBalance = AccountTransaction::where('account_id', $request->payment_account_id)->latest('created_at')->first();
-                if ($oldBalance) {
-                    $accountTransaction->balance = $oldBalance->balance - $request->payment_balance;
-                } else {
-                    $accountTransaction->balance = -$request->payment_balance;
-                }
-                $accountTransaction->created_at = Carbon::now();
-                $accountTransaction->save();
 
-                $transaction = new Transaction;
-                $transaction->date = date('Y-m-d', strtotime($request->repayment_date));
-                $transaction->processed_by = Auth::user()->id;
-                $transaction->payment_type = 'pay';
-                $transaction->particulars = 'loanRepayment';
-                $transaction->others_id = $request->data_id; // loan id
-                $transaction->payment_method = $request->payment_account_id;
-                $transaction->credit = 0;
-                $transaction->debit = $request->payment_balance;
-                $transaction->balance = $request->payment_balance;
-                $transaction->branch_id = Auth::user()->branch_id;
-                $transaction->save();
-            } else {
-                return response()->json([
-                    'status' => 400,
-                    'message' => 'Your account Balance is low Please Select Another account or Add Balance on your Account',
-                ]);
-            }
+            $accountTransaction = new AccountTransaction;
+            $accountTransaction->branch_id = Auth::user()->branch_id;
+            $accountTransaction->created_by = Auth::user()->id;
+            $accountTransaction->purpose = 'loan_repayments';
+            $accountTransaction->reference_id = $loan_repayments->id; // loan id
+            $accountTransaction->account_id = $request->payment_account_id;
+            $accountTransaction->debit = $request->payment_balance;
+            $accountTransaction->transaction_id = generate_unique_invoice(AccountTransaction::class, 'transaction_id', 10);
+            $accountTransaction->created_at = Carbon::now();
+            $accountTransaction->save();
+
+
 
             return response()->json([
                 'status' => 200,
