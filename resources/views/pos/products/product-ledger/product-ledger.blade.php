@@ -36,7 +36,7 @@
                                     <p class="mt-1 mb-1 show_branch_name"><b>{{ $siteTitle }}</b></p>
                                 @endif
                             @else
-                                <a href="#" class="noble-ui-logo logo-light d-block mt-3">EIL<span>Electro</span></a>
+                                <a href="#" class="noble-ui-logo logo-light d-block mt-3">Eclipse<span>POS</span></a>
                             @endif
                             <hr>
                             <p class="show_branch_address">{{ $branch->address ?? '' }}</p>
@@ -48,11 +48,11 @@
                                 <input class="btn btn-secondary  " type="btn" readonly value="Add Variation"
                                     id="toggleButton">
                             </a>
-                            <button type="button"
+                            {{-- <button type="button"
                                 class="btn btn-outline-primary btn-icon-text me-2 mb-2 mb-md-0 barcode-print-btn">
                                 <i class="btn-icon-prepend fa-solid fa-barcode"></i>
                                 Print Barcode
-                            </button>
+                            </button> --}}
                             <button type="button"
                                 class="btn btn-outline-primary btn-icon-text me-2 mb-2 mb-md-0 print-btn">
                                 <i class="btn-icon-prepend" data-feather="printer"></i>
@@ -156,7 +156,7 @@
                                                 <th>Origin</th>
                                                 <th>Status</th>
                                                 {{-- <th>Barcode</th> --}}
-                                                <th>variation Status</th>
+                                                <th class="status-variation">variation Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -181,7 +181,7 @@
                                                         </td>
                                                         <td>{{ $variation->origin ?? 'N/A' }}</td>
                                                         <td>{{ $variation->status ?? 'N/A' }}</td>
-                                                        <td>
+                                                        <td class="status-variation">
                                                             @if ($variation->productStatus)
                                                                 <a href="javascript:void(0)"
                                                                     class="btn btn-sm {{ $variation->productStatus === 'active' ? 'btn-success' : 'btn-danger' }} variation-status-btn"
@@ -398,6 +398,7 @@
             .filter_box,
             nav,
             .footer,
+            .status-variation,
             .id,
             .dataTables_filter,
             .dataTables_length,
@@ -787,36 +788,42 @@
             };
         })
 
-        $(document).ready(function() {
-            $('.variation-status-btn').on('click', function() {
-                var variationId = $(this).data('variation-id'); // Correct method to get data attribute
-                var button = $(this);
+     $(document).ready(function() {
+    $('.variation-status-btn').on('click', function() {
+        var variationId = $(this).data('variation-id');
+        var button = $(this);
 
-                $.ajax({
-                    url: '/variation/status/' + variationId, // Adjusted endpoint
-                    type: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}' // Laravel CSRF token
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            // Update button text and class based on new status
-                            if (response.newStatus === 'active') {
-                                button.text('active').removeClass('btn-danger').addClass(
-                                    'btn-success');
-                            } else {
-                                button.text('inactive').removeClass('btn-success').addClass(
-                                    'btn-danger');
-                            }
-                        } else {
-                            alert(response.message || 'Failed to update status');
-                        }
-                    },
-                    error: function() {
-                        alert('An error occurred while updating the status');
-                    }
-                });
-            });
+        // Optimistic update: Toggle UI immediately for instant feedback
+        var isCurrentlyActive = button.hasClass('btn-success');
+        var newStatus = isCurrentlyActive ? 'inactive' : 'active';
+
+        // Apply toggle right away
+        button.text(newStatus).toggleClass('btn-success btn-danger');
+
+        // Now send AJAX request
+        $.ajax({
+            url: '/variation/status/' + variationId,
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                if (!response.success) {
+                    // Revert UI if server failed
+                    button.text(isCurrentlyActive ? 'active' : 'inactive')
+                          .toggleClass('btn-success btn-danger');
+                    alert(response.message || 'Failed to update status');
+                }
+                // If success, UI is already updated – nothing to do!
+            },
+            error: function() {
+                // Revert on error
+                button.text(isCurrentlyActive ? 'active' : 'inactive')
+                      .toggleClass('btn-success btn-danger');
+                alert('An error occurred while updating the status');
+            }
         });
+    });
+});
     </script>
 @endsection

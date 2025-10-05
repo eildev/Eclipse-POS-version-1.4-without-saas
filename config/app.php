@@ -55,13 +55,13 @@ return [
     |
     */
 
-    // 'url' => env('APP_URL', 'http://localhost'),
+    'url' => env('APP_URL', 'http://localhost'),
 
-    // 'asset_url' => env('ASSET_URL', '/'),
+    'asset_url' => env('ASSET_URL', '/'),
 
-    'url' => env('APP_URL', 'https://polash-surgical.eclipseposapp.com/'),
+    // 'url' => env('APP_URL', 'https://polash-surgical.eclipseposapp.com/'),
 
-    'asset_url' => env('ASSET_URL', 'https://polash-surgical.eclipseposapp.com/public'),
+    // 'asset_url' => env('ASSET_URL', 'https://polash-surgical.eclipseposapp.com/public'),
 
     /*
     |--------------------------------------------------------------------------

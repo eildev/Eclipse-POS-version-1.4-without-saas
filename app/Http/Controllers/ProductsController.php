@@ -388,26 +388,29 @@ class ProductsController extends Controller
         ]);
     }
 
-    public function variationStatus($id)
-    {
-        $variation = Variation::findOrFail($id);
+  public function variationStatus($id)
+{
+    $variation = Variation::findOrFail($id);
 
-        // Get current status
-        $currentStatus = $variation->productStatus;
-
-        // Toggle status
-        $newStatus = $currentStatus === 'active' ? 'inactive' : 'active';
-
-        // Update the variation
-        $variation->update(['productStatus' => $newStatus]);
-
+    // Skip if no current status
+    if (is_null($variation->productStatus)) {
         return response()->json([
-            'success' => true,
-            'newStatus' => $newStatus,
-            'message' => 'Variation status updated successfully',
-        ]);
+            'success' => false,
+            'message' => 'Variation has no status to toggle',
+        ], 400);
     }
 
+    $currentStatus = $variation->productStatus;
+    $newStatus = $currentStatus === 'active' ? 'inactive' : 'active';
+
+    $variation->update(['productStatus' => $newStatus]);
+
+    return response()->json([
+        'success' => true,
+        'newStatus' => $newStatus,
+        'message' => 'Variation status updated successfully',
+    ]);
+}
     public function edit($id)
     {
         // dd($id);
