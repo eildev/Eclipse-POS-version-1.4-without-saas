@@ -26,12 +26,12 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <!-- Total Customer Section -->
                         <div>
-                            <h6 class=" mb-0">Total Customer</h6>
+                            <h6 class="card-title  mb-0">Total Customer</h6>
                             <h3 class="mb-2">{{ $totalCustomer }}</h3>
                         </div>
                         <!-- New Customer Section -->
                         <div>
-                            <h6 class=" mb-0">New Customer</h6>
+                            <h6 class="card-title  mb-0">New Customer</h6>
                             <h3 class="mb-2">{{ $todayCustomerCount }}</h3>
                         </div>
                     </div>
@@ -44,12 +44,12 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <!-- Total Customer Section -->
                         <div>
-                            <h6 class=" mb-0">Total Supplier</h6>
+                            <h6 class="card-title  mb-0">Total Supplier</h6>
                             <h3 class="mb-2">{{ $totalSupplier }}</h3>
                         </div>
                         <!-- New Customer Section -->
                         <div>
-                            <h6 class=" mb-0">New Supplier</h6>
+                            <h6 class="card-title  mb-0">New Supplier</h6>
                             <h3 class="mb-2">{{ $todaySupplierCount }}</h3>
                         </div>
                     </div>
@@ -263,7 +263,7 @@
         <div class="col-md-3 grid-margin stretch-card">
             <div class="card ">
                 <div class="card-body  p-2">
-                    <sapn class="ps-2">Total Stock Value</sapn>
+                    <sapn class="card-title  ps-2">Total Stock Value</sapn>
                     <div class="d-flex p-2 justify-content-between align-items-center">
                         <!-- Total Customer Section -->
                         @php
@@ -284,14 +284,14 @@
                      @endphp
 
                         <div>
-                            <h6 class=" mb-0">Total Cost Price</h6>
+                            <h6 class="card-title  mb-0">Total Cost Price</h6>
                             <h6 class="mb-2">
                                 {{ $totalCost }}
                         </h6>
                         </div>
 
                         <div>
-                            <h6 class=" mb-0">Total Sale Price</h6>
+                            <h6 class="card-title  mb-0">Total Sale Price</h6>
                             <h6 class="mb-2">{{ $totalSale }}</h6>
                         </div>
                     </div>
@@ -337,7 +337,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <!-- Total Customer Section -->
                         <div>
-                            <h6 class=" mb-0">Total Bank Amount</h6>
+                            <h6 class="card-title  mb-0">Total Bank Amount</h6>
                             <h3 class="mb-2 branchAmount"></h3>
                         </div>
                     </div>
@@ -350,7 +350,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <!-- Total Customer Section -->
                         <div>
-                            <h6 class=" mb-0">Total paid Salary</h6>
+                            <h6 class=" card-title  mb-0">Total paid Salary</h6>
                             <h3 class="mb-2 ">{{ $TotalPaidSalary }}</h3>
                         </div>
 
